@@ -75,9 +75,7 @@ vector<bool> treat_input(string s) {
 int main()
 {
 	string input;
-
-
-
+	
 	//cout << "Bring me a string!" << endl;
 	//getline(cin, input);
 	cout << "Automatic string = hhhhhhhhhhhhphphpphhpphhpphpphhpphhpphpphhpphhpphphphhhhhhhhhhhh" << endl;
@@ -127,6 +125,11 @@ int main()
 
 	cout << "eo matches: " << eo << endl;
 	cout << "oe matches: " << oe << endl;
+
+	string a = "a";
+	char b = 'b';
+	string ab = a += b;
+	cout << ab << endl;
 
 	return(brake(),0);
 
