@@ -72,18 +72,31 @@ vector<bool> treat_input(string s) {
 	}
 	return v;
 }
+std::vector<bool> reverse_vector(std::vector<bool>v)
+{
+	std::reverse(v.begin(), v.end());
+	return v;
+}
+string make_loop(int gap, char f, char inc, char dec) {
+
+	
+	string incstr = string(gap, inc);
+	string decstr = string(gap, dec);
+
+	return(incstr + f + decstr + f);
+
+}
 int main()
 {
 	string input;
 	
 	//cout << "Bring me a string!" << endl;
 	//getline(cin, input);
-	cout << "Automatic string = hhhhhhhhhhhhphphpphhpphhpphpphhpphhpphpphhpphhpphphphhhhhhhhhhhh" << endl;
-	input = "hhhhhhhhhhhhphphpphhpphhpphpphhpphhpphpphhpphhpphphphhhhhhhhhhhh";
+	cout << "Automatic string = phphppphhhpphphphhhhhp" << endl;
+	input = "phphppphhhpphphphhhhhp";
 	vector<bool> seq=treat_input(input);
 	int n = seq.size();
 	for (bool b: seq) {
-	
 		cout << b;
 	}
 	cout << endl;
@@ -93,7 +106,6 @@ int main()
 	int o = 0;
 
 	count_h_parity(seq,even, odd,e,o);
-	brake();
 	cout << "Even: ";
 	for (auto i = even.begin(); i != even.end(); ++i)
 		cout << *i << ' ';
@@ -125,11 +137,56 @@ int main()
 
 	cout << "eo matches: " << eo << endl;
 	cout << "oe matches: " << oe << endl;
+	if (oe > eo) {
+		//old switcheroo	
+		seq=reverse_vector(seq);
+		
+		cout << "String reversed! it is now\n";
+		for (bool b : seq) { cout << b; }
+		cout << endl;
 
-	string a = "a";
-	char b = 'b';
-	string ab = a += b;
-	cout << ab << endl;
+		if (n % 2 == 0) { //Be cautious if you want to use these again after reversing. You would have to decide whether to keep them as is or update to reflect new parities (as below)
+			auto temp = even;
+			even = odd;
+			odd = temp;
+			even = reverse_vector(even);
+			odd = reverse_vector(odd);
+			///prolly bad practice. Gonna comment out this part and not rely on these
+
+			auto tempp = eo;
+			eo = oe;
+			oe = tempp;
+		}
+	}
+	int matches = eo; //would be nice to not use eo and oe from here on out
+	//evens is first so do eo loops to place eo H-monomers
+
+
+	int placed = 0;
+	int gap = 0;
+	string fold="";
+
+	if (even[0]) {//check first one manually since we dont need to fold it. Then start from i=1
+		placed++;
+	}
+
+	int i = 1;
+	while (placed < matches) {
+		if (seq[2*i]) {
+			fold += make_loop(gap, 'r','u','d');
+			placed++;
+			i++;
+			gap = 0;
+		}
+		else {
+			gap++;
+			i++;
+		}
+	}
+	for (bool b : even) { cout << b; }
+	cout << endl;
+	string ab = string(3, 'a');
+	cout << fold << endl;
 
 	return(brake(),0);
 
