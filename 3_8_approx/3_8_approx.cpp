@@ -54,7 +54,7 @@ vector<bool> treat_input(string s) {
 
 	}
 	if (well_formed) {
-		cout << "input is a valid HP string" << endl;
+	//	cout << "input is a valid HP string" << endl;
 	}
 	else {
 		cout << "input is NOT a valid HP string" << endl;
@@ -72,11 +72,11 @@ vector<bool> treat_input(string s) {
 	}
 	return v;
 }
-std::vector<bool> reverse_vector(std::vector<bool>v)
+/*std::vector<bool> reverse_vector(std::vector<bool>v)
 {
 	std::reverse(v.begin(), v.end());
 	return v;
-}
+}*/
 string make_loop(int gap, char f, char inc, char dec) {
 
 	
@@ -86,94 +86,34 @@ string make_loop(int gap, char f, char inc, char dec) {
 	return(incstr + f + decstr + f);
 
 }
-int main()
-{
-	string input;
+
+   /*
+	*	seq = boolvector to start the NF from
+	*	matches = number of H to put in the 'surface'
+	*	udlr = alphabet to use in the fold output. default is "udlr" for "up, down, left, right"
+	*	used = reference for the function to pass back how many bools it consumed from seq
+	*	odds = true iff we are matching odds. Turned out to be nessecary
+	*/	
+string normal_form(vector<bool> seq, int matches, string udlr, bool odds) {
 	
-	//cout << "Bring me a string!" << endl;
-	//getline(cin, input);
-	cout << "Automatic string = phphppphhhpphphphhhhhp" << endl;
-	input = "phphppphhhpphphphhhhhp";
-	vector<bool> seq=treat_input(input);
-	int n = seq.size();
-	for (bool b: seq) {
-		cout << b;
-	}
-	cout << endl;
-	vector<bool> even((n+1)/2); //to get index in original: multiply index by 2
-	vector<bool> odd(n/2); //to get index in original: multiply index by 2 and add 1
-	int e = 0;
-	int o = 0;
-
-	count_h_parity(seq,even, odd,e,o);
-	cout << "Even: ";
-	for (auto i = even.begin(); i != even.end(); ++i)
-		cout << *i << ' ';
-	cout << endl;
-
-	cout << " Odd: ";
-	for (auto i = odd.begin(); i != odd.end(); ++i)
-		cout << *i << ' ';
-	cout << endl;
-
-	
-	cout << e << " evens and " << o << " odds. Can find a matching of at least " << (e<o? e/2 : o/2) << endl;
-
-	int eo=0;
-	int oe=0;
-	for (int i = odd.size() - 1; (odd.size()-1-i)*2 <i*2+1; i--) {
-	//even is sometimes 1 longer. When this is the case, we cannot match last even. Therefore counting backwards from odds should give correct result each time
-		if (odd[i] && even[(odd.size() - 1) - i]) { //even index is odds index 'reversed'. In cases with unequal length, last element of even is not accessed.
-			eo++;
-		}
-	}
-	for (int i = even.size()-1; (even.size() - 1 - i)*2+1 < i*2; i--) {
-	//always ignoring first even and ignoring last odd when equal length (draw on paper to understand)
-		if (even[i] && odd[even.size() - 1 - i]){
-			oe++;
-		}
-	}
-	//this matching method is correct, but ugly AF
-
-	cout << "eo matches: " << eo << endl;
-	cout << "oe matches: " << oe << endl;
-	if (oe > eo) {
-		//old switcheroo	
-		seq=reverse_vector(seq);
-		
-		cout << "String reversed! it is now\n";
-		for (bool b : seq) { cout << b; }
-		cout << endl;
-
-		if (n % 2 == 0) { //Be cautious if you want to use these again after reversing. You would have to decide whether to keep them as is or update to reflect new parities (as below)
-			auto temp = even;
-			even = odd;
-			odd = temp;
-			even = reverse_vector(even);
-			odd = reverse_vector(odd);
-			///prolly bad practice. Gonna comment out this part and not rely on these
-
-			auto tempp = eo;
-			eo = oe;
-			oe = tempp;
-		}
-	}
-	int matches = eo; //would be nice to not use eo and oe from here on out
-	//evens is first so do eo loops to place eo H-monomers
-
-
+	char f = udlr[3];
+	char inc = udlr[0];
+	char dec = udlr[1];
+	//check first one manually since we dont need to fold it. Then start from i=1
 	int placed = 0;
 	int gap = 0;
-	string fold="";
-
-	if (even[0]) {//check first one manually since we dont need to fold it. Then start from i=1
-		placed++;
+	string fold = "";
+	if (odds) {
+		fold += f;
+		if (seq[1])
+			placed++;
 	}
-
+	else if(seq[0]) {placed++;}
 	int i = 1;
+
 	while (placed < matches) {
-		if (seq[2*i]) {
-			fold += make_loop(gap, 'r','u','d');
+		if (seq[2 * i+(odds?1:0)]) {
+			fold += make_loop(gap, udlr[3], udlr[0], udlr[1]);
 			placed++;
 			i++;
 			gap = 0;
@@ -183,10 +123,154 @@ int main()
 			i++;
 		}
 	}
-	for (bool b : even) { cout << b; }
+	return(fold);
+
+}
+string make_cusp(vector<bool> seq, string udlr) {
+	
+	if (seq[1]) {
+		std::cout << "Cusp had a match in it." << endl;
+	}
+	//find next H that can be matched
+	int next_h=3;
+	while (!seq[next_h]) {
+		if (next_h + 2 >= seq.size()) {
+			std::cout << "couldnt match anything after cusp?? better have a look at this" << endl;
+			return "";
+		}
+		else { next_h += 2; }
+
+	}
+	int gap= (next_h/2 -1);
+	
+
+
+	char inc = udlr[0]; 
+	char dec = udlr[1];
+	char f = udlr[3];
+	char b = udlr[2];
+	string incstr = string(gap, inc);
+	string decstr = string(gap, dec);
+
+	std::cout << "cusp  gap: " << gap << endl;
+	return(incstr + f + decstr + dec+b);
+	
+}
+string ufold(vector<bool> seq, int oematches, int eomatches, string udlr) //make u-fold
+{
+	bool oecase = oematches > eomatches;
+
+
+	//1 put matched number of H on the surface
+	int matches = (oecase ? oematches : eomatches);
+	string fold = normal_form(seq, matches, udlr,oecase); 
+	//2 make the cusp
+
+	int used = fold.length();//not +1 since last fold-char does not consume a bool
+	vector < bool >::const_iterator first = seq.begin() + used;
+	vector < bool >::const_iterator last = seq.end();
+	
+	vector<bool> step2 = vector<bool>(first, last);
+	fold += make_cusp(step2,udlr);
+
+	used = fold.length();
+	first = seq.begin()+used;
+	last = seq.end();
+	vector<bool> step3(first,last);
+	
+	cout << "Step 3 (after cusp) begins with; ";
+	for (bool b : step3) {
+		cout << b;
+	}
 	cout << endl;
-	string ab = string(3, 'a');
-	cout << fold << endl;
+
+	//3
+	char c[4] = { udlr[1],udlr[0],udlr[3],udlr[2] };
+	try
+	{
+		fold += normal_form(step3, matches, c, false);// think its always 'even' on second part
+	}
+	catch (int e)
+	{
+		cout << "Exeption in second NF. Refolding with -1. Exception number: " << e << '\n';
+		fold += normal_form(step3, matches-1, c, !oecase);// do full and redo with -1 if exception
+	}
+	//4 leftovers
+	int leftovers = seq.size() - 1 - fold.length();
+	string appendix = string(leftovers, udlr[2]);
+	fold += appendix;
+	return (fold);
+}
+string run(string input) {
+
+	vector<bool> seq = treat_input(input);
+	int n = seq.size();
+
+	int H_e = 0;
+	int H_o = 0;
+	for (int i = 0; i < seq.size(); i++) {
+		if (seq[i]) {
+			if (i % 2 == 0) {
+				H_e++;
+			}
+			else {
+				H_o++;
+			}
+		}
+	}
+	int all_e = (n + 1) / 2;
+	int all_o = n / 2;
+	int eo = 0;
+	int oe = 0;
+	for (int i = n/2 - 1; (all_o - 1 - i) * 2 <i * 2 + 1; i--) {
+		//even is sometimes 1 longer. When this is the case, we cannot match last even. Therefore counting backwards from odds should give correct result each time
+		if (seq[2*i+1] && seq[2*((all_o - 1) - i)]) { //even index is odds index 'reversed'. In cases with unequal length, last element of even is not accessed.
+			eo++;
+		}
+	}
+	for (int i = all_e - 1; (all_e - 1 - i) * 2 + 1 < i * 2; i--) {
+		//always ignoring first even and ignoring last odd when equal length (draw on paper to understand)
+		if (seq[2*i] && seq[2*(all_e - 1 - i)+1]) {
+			oe++;
+		}
+	}
+
+	cout << "even/odd matches: " << eo << endl;
+	cout << "odd/even matches: " << oe << endl;
+
+	string my_ufold = ufold(seq, oe, eo, "udlr");
+	cout << my_ufold << endl;
+	return(my_ufold);
+
+}
+int main()
+{
+	string inps[] = {
+		"hhppppphhppphppphp",
+		"hphphhhppphhhhpphh",
+		"phpphphhhphhphhhhh",
+		"hphpphhphpphphhpphph",
+		"hhhpphphphpphphphpph",
+		"hhpphpphpphpphpphpphpphh",
+		"pphpphhpppphhpppphhpppphh",
+		"ppphhpphhppppphhhhhhhpphhpppphhpphpp",
+		"pphpphhpphhppppphhhhhhhhhhpppppphhpphhpphpphhhhh",
+		"hhphphphphhhhphppphppphpppphppphppphphhhhphphphphh",
+		"pphhhphhhhhhhhppphhhhhhhhhhphppphhhhhhhhhhhhpppphhhhhhphhphp",
+		"hhhhhhhhhhhhphphpphhpphhpphpphhpphhpphpphhpphhpphphphhhhhhhhhhhh",
+		"hhhhpppphhhhhhhhhhhhpppppphhhhhhhhhhhhppphhhhhhhhhhhhppphhhhhhhhhhhhppphpphhpphhpphph",
+		"pppppphphhppppphhhphhhhhphhpppphhpphhphhhhhphhhhhhhhhhphhphhhhhhhppppppppppphhhhhhhpphphhhpppppphphh",
+		"ppphhpphhhhpphhhphhphhphhhhpppppppphhhhhhpphhhhhhppppppppphphhphhhhhhhhhhhpphhhphhphpphphhhpppppphhh" };
+	for (string inp : inps) {
+		string fold=run(inp);
+		
+		std::string filename = "\"C:/Users/marti/Documents/Visual Studio 2015/Projects/3_8_approx/3_8_approx/hpview.py\"";
+		std::string command = "python "+filename+ " " + inp + " "+ fold;
+		system(command.c_str());
+	}
+	//run("hphphphpp");
+	
+
 
 	return(brake(),0);
 
