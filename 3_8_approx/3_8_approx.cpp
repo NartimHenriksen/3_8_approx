@@ -201,6 +201,55 @@ string ufold(vector<bool> seq, int oematches, int eomatches, string udlr) //make
 	fold += appendix;
 	return (fold);
 }
+int matchings(vector<bool> seq, bool evenodd) {
+		
+	int i;
+	int j;
+	if (evenodd) {
+		//i is first even and j is last odd
+		i = 0;
+		if (seq.size() % 2 == 0)
+			j = seq.size() - 1;
+		else
+			j = seq.size() - 2;
+	}
+	else {//odd-even
+		i = 1; 
+		if (seq.size() % 2 == 0)
+			j = seq.size() - 2;
+		else
+			j = seq.size() - 1;
+	}
+	int matchings = 0;
+
+	while (i < j) {
+		while (!seq[i]) {
+			if(i+2<j)
+				i += 2;
+			else { return(matchings); }
+		}
+		while (!seq[j]) {
+			if (i + 2 < j)
+				j -= 2;
+			else
+				return(matchings);
+		}
+		if (j - i > 1) {
+			matchings++;	
+		}
+		else if (j - i == 1) {
+			cout << "matched pair were neighbours" << endl;
+		}
+		else { cout << "Wait, what?" << endl; }
+
+		i += 2;
+		j -= 2;
+		
+	}
+	return (matchings);
+}
+
+
 string run(string input) {
 
 	vector<bool> seq = treat_input(input);
@@ -220,22 +269,13 @@ string run(string input) {
 	}
 	int all_e = (n + 1) / 2;
 	int all_o = n / 2;
-	//Here.Fix this horseshit
+
 	int eo = 0;
 	int oe = 0;
-	for (int i = n/2 - 1; (all_o - 1 - i) * 2 <i * 2 + 1; i--) {
-		//even is sometimes 1 longer. When this is the case, we cannot match last even. Therefore counting backwards from odds should give correct result each time
-		if (seq[2*i+1] && seq[2*((all_o - 1) - i)]) { //even index is odds index 'reversed'. In cases with unequal length, last element of even is not accessed.
-			eo++;
-		}
-	}
-	for (int i = all_e - 1; (all_e - 1 - i) * 2 + 1 < i * 2; i--) {
-		//always ignoring first even and ignoring last odd when equal length (draw on paper to understand)
-		if (seq[2*i] && seq[2*(all_e - 1 - i)+1]) {
-			oe++;
-		}
-	}
+	
 
+	eo = matchings(seq, true);
+	oe = matchings(seq, false);
 	cout << "even/odd matches: " << eo << endl;
 	cout << "odd/even matches: " << oe << endl;
 
@@ -265,11 +305,10 @@ int main()
 	for (string inp : inps) {
 		string fold=run(inp);
 		
-		std::string filename = "\"C:/Users/marti/Documents/Visual Studio 2015/Projects/3_8_approx/3_8_approx/hpview.py\""; //use path relative in project i guess
+		std::string filename = "hpview.py"; //use path relative in project i guess
 		std::string command = "python "+filename+ " " + inp + " "+ fold;
 		system(command.c_str());
 	}
-	//run("hphphphpp");
 	
 
 
