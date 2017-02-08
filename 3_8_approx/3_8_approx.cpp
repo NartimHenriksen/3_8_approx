@@ -220,6 +220,7 @@ string run(string input) {
 	}
 	int all_e = (n + 1) / 2;
 	int all_o = n / 2;
+	//Here.Fix this horseshit
 	int eo = 0;
 	int oe = 0;
 	for (int i = n/2 - 1; (all_o - 1 - i) * 2 <i * 2 + 1; i--) {
@@ -264,7 +265,7 @@ int main()
 	for (string inp : inps) {
 		string fold=run(inp);
 		
-		std::string filename = "\"C:/Users/marti/Documents/Visual Studio 2015/Projects/3_8_approx/3_8_approx/hpview.py\"";
+		std::string filename = "\"C:/Users/marti/Documents/Visual Studio 2015/Projects/3_8_approx/3_8_approx/hpview.py\""; //use path relative in project i guess
 		std::string command = "python "+filename+ " " + inp + " "+ fold;
 		system(command.c_str());
 	}
