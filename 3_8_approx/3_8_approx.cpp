@@ -147,6 +147,7 @@ vector<block> blockify(vector<bool> seq) {
 				
 
 	}
+	label_blocks(blocks);
 	return blocks;
 	
 }
@@ -208,7 +209,81 @@ string make_loop(int gap, char f, char inc, char dec) {
 
 	return(incstr + f + decstr + f);
 
+}\
+
+void print_blocks(vector<block> blocks) {
+	for (block b : blocks) {
+		cout << (b.is_sep ? "SEP: " : (b.is_x ? "  X: " : "  Y: "));
+		for (bool ba : b.sequence) { cout << ba; }
+
+		cout << "\nSize: " << b.size << " Val: " << b.val << "\n"<< endl;
+
+	}
+
+
 }
+//dont need 4 methods for this but im just gonna spam them to make the subroutine more readabke
+int m_xy(vector<block> A, vector<block> B) {
+	int XA=0;
+	int YB = 0;
+	for (block bloc : A) {
+		if (!bloc.is_sep && bloc.is_x) { //could do away with one of these checks if it was an actual label rather than bools. Not sure if Its needed.
+			XA += bloc.val;
+		}
+	}
+	for (block bloc : B) {
+		if (!bloc.is_sep && !bloc.is_x)
+			YB += bloc.val;
+	}
+	return (XA<YB?XA:YB);
+
+
+}
+int m_yx(vector<block> A, vector<block> B) {
+	int YA = 0;
+	int XB = 0;
+	for (block bloc : A) {
+		if (!bloc.is_sep && !bloc.is_x) { //could do away with one of these checks if it was an actual label rather than bools. Not sure if Its needed.
+			YA += bloc.val;
+		}
+	}
+	for (block bloc : B) {
+		if (!bloc.is_sep && bloc.is_x)
+			XB += bloc.val;
+	}
+	return (XB<YA ? XB : YA);
+}
+
+int M_xy(vector<block> A, vector<block> B) {
+	int XA = 0;
+	int YB = 0;
+	for (block bloc : A) {
+		if (!bloc.is_sep && bloc.is_x) { //could do away with one of these checks if it was an actual label rather than bools. Not sure if Its needed.
+			XA += bloc.val;
+		}
+	}
+	for (block bloc : B) {
+		if (!bloc.is_sep && !bloc.is_x)
+			YB += bloc.val;
+	}
+	return (XA>YB ? XA : YB);
+}
+int M_yx(vector<block> A, vector<block> B) {
+	int YA = 0;
+	int XB = 0;
+	for (block bloc : A) {
+		if (!bloc.is_sep && !bloc.is_x) { //could do away with one of these checks if it was an actual label rather than bools. Not sure if Its needed.
+			YA += bloc.val;
+		}
+	}
+	for (block bloc : B) {
+		if (!bloc.is_sep && bloc.is_x)
+			XB += bloc.val;
+	}
+	return (XB>YA ? XB : YA);
+
+}
+
    /*
 	*	seq = boolvector to start the NF from
 	*	matches = number of H to put in the 'surface'
@@ -370,13 +445,35 @@ int matchings(vector<bool> seq, bool evenodd) {
 	}
 	return (matchings);
 }
-int subroutine1(vector<bool> seq) {
+pair<vector<block>,vector<block>> subroutine1(vector<bool> seq) {
 	vector<block> blocks = blockify(seq);
-	//bool labels = first_label_x(blocks);
 
-	//vector<vector<bool>> B1= subset(blocks, 0, 2);
-	//vector<vector<bool>> B2 = subset(blocks, 3, blocks.size()-1);
-	return 0;
+	vector<block> B1= subset(blocks, 0, 2);
+	vector<block> B2 = subset(blocks, 3, blocks.size()-1);
+	vector<block> Bp;
+	vector<block> Bpp;
+	int e;
+	int E;
+	if (m_xy(B1, B2) > m_yx(B1, B2)) {
+		Bp = B2; Bpp = B1; e = m_xy(B1,B2), E=M_xy(B1,B2); 
+	}
+	else {
+		Bp = B1; Bpp = B2; e = m_yx(B1, B2), E = M_yx(B1, B2);
+	}
+	int k = (blocks.size() - 1) / 2;
+	for (int i = 2; i < k; i++) {//be more literal if indexing goes wrong
+		B1 = subset(blocks,0,i*2);
+		B2 = subset(blocks, 2 * i + 1, blocks.size() - 1);
+		if (cond(e, m_xy(B1,B2), E, M_xy(B1,B2))) {
+			Bp = B2; Bpp = B1; e = m_xy(B1, B2); E = M_xy(B1, B2);
+		}
+		if (cond(e, m_yx(B1, B2),E,M_yx(B1,B2) )) {
+			Bp = B1; Bpp = B2; e = m_yx(B1, B2); E = M_yx(B1, B2);
+			
+		}
+	}
+	
+	return{ Bpp,Bp };
 
 }
 
@@ -441,20 +538,25 @@ int main()
 		std::string command = "python "+filename+ " " + inp + " "+ fold;
 		system(command.c_str());
 	}
-	*/
+	*//*
 	for (string s: inps) {
 		cout << s << endl;
 		vector<block>blocks = blockify(treat_input(s));
 		label_blocks(blocks);
-		for (block b : blocks) {
-			cout << (b.is_sep ? "SEP: " : (b.is_x ? "  X: " : "  Y: "));
-			for (bool ba : b.sequence) { cout << ba; }
+		
+	}*/
+	vector<bool> t = treat_input(inps[0]);
+	cout << inps[0]<<endl;
+	vector<block> blocks = blockify(t);
+	vector<block> p1;
+	vector<block> p2;
+	pair<vector<block>, vector<block>> split = subroutine1(t); //need to make X-superblock for Bpp (first one), and Y for Bp (second one)
+	
+	cout << "First" << endl;
+	print_blocks(split.first);
 
-			cout << endl;
-			cout << "Size: " << b.size << " Val: " << b.val << endl;
-
-		}
-	}
+	cout << "Second" << endl;
+	print_blocks(split.second);
 
 	cout << endl;
 
