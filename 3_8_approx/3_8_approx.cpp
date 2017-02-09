@@ -41,32 +41,35 @@ bool cond(int a, int b, int A, int B) {
 }
 
 //int show how many 0 are in the block sepators, or how many 1s in the blocks.
-vector<int> blockify(vector<bool> seq) {
-	vector<vector<bool>> blocks;
-	return vector < int>(0);
+vector<vector<bool>> blockify(vector<bool> seq) {
+	vector<vector<bool>> blocks= vector<vector<bool>>();
 	int i = 0;
 	while (!seq[i]) {
 		i++;
 	}
-	blocks[0] = vector<bool>(i,0);
-	cout << blocks[0].size() << " " << blocks[0][0] << endl;
+	vector<bool> supp = vector<bool>(i, false);
+	blocks.push_back(supp);
 
 	int bi = 1; //block index
 	int j = 0;
 	while (i <= seq.size() - 1) {
 		j = i + 1;
-		/*while (!seq[j]) { j++; } //j is next 1
-		if ((j - i) % 2 == 0){ //uneven is new block even is continue block
+		while (! ( j == seq.size() || (seq[j] && (j - i) % 2 == 1)))
+		{ j++; } //"until seq[j] is 1 AND distance to i is uneven"
+		//count block 0 that separate them
+		int z = 0;
 
-			bv = concatenate(bv,seq.)
+		while (seq[j - z - 1] == 0) {
+			z += 1;
 		}
-		if number of 0 between is odd, add it to block length and continue
-		if even then end block and make sep
-		*/
 
-		//sep
+		blocks.push_back(subset(seq, i, j - 1-z));
+		blocks.push_back(vector<bool>(z,false));
+		i = j;
+				
 
 	}
+	return blocks;
 	
 }
 
@@ -354,15 +357,23 @@ int main()
 		system(command.c_str());
 	}
 	*/
-	vector<string> test;
-	test.push_back("Martin");
-	test.push_back("er");
-	test.push_back("den");
-	test.push_back("bedste");
-	test.push_back("fat");
-	test.push_back("det");
-
 	
+	vector<bool>test = {0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,1,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,1,1,0,1,0,0,1,1,0,0,0,1};
+	vector<vector<bool>>b = blockify(test);
+
+
+	for (bool b : test) {
+		cout << b << " ";
+	}
+	cout << endl;
+
+	for (vector<bool> block : b) {
+		cout << endl;
+		for (bool bo : block) {
+			cout << bo << " ";
+		}
+	}
+
 
 	return(brake(),0);
 
