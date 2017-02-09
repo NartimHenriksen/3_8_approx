@@ -40,18 +40,26 @@ bool cond(int a, int b, int A, int B) {
 	return((a < b) || ((a = b) && (A < B)));
 }
 
+struct block {
+	vector<bool> sequence;
+	int size;
+	int val;
+	bool is_x;
+	bool is_sep = false; //mb dont even need this when we have val
+
+};
 //true if it starts with x,false if it starts with y. They alternate so rest should be clear
-bool first_label_x(vector<vector<bool>> blocks) {
+bool first_label_x(vector<block> blocks) {
 	int first=0;
 	int second=0;
 	for (int i = 1; i < blocks.size(); i += 4) {
-		for (bool b : blocks[i]) {
+		for (bool b : blocks[i].sequence) {
 			if (b)
 				first++;
 		}
 	}
 	for (int i = 3; i < blocks.size(); i += 4) {
-		for (bool b : blocks[i]) {
+		for (bool b : blocks[i].sequence) {
 			if (b)
 				second++;
 		}
@@ -60,7 +68,7 @@ bool first_label_x(vector<vector<bool>> blocks) {
 		return true;
 	if (first == second) //if they are equal then X should have the most 1's in endpoints
 	{
-		if (blocks[0].size() == 0)//first block has an endpoint so x can be there
+		if (blocks[0].size == 0)//first block has an endpoint so x can be there
 			return true;
 		else
 			return (blocks.size() % 4 == 3); //This is true when last block has same parity as first block, and false otherwise
@@ -69,16 +77,15 @@ bool first_label_x(vector<vector<bool>> blocks) {
 	else
 		return false;
 }
+void label_blocks(vector<block> &blocks) {
+	bool next_label = first_label_x(blocks);
+	for (int i = 1; i < blocks.size(); i += 2) {
+		blocks[i].is_x = next_label;
+		next_label = !next_label;
+	}
+}
 //int show how many 0 are in the block sepators, or how many 1s in the blocks.
 
-struct block {
-	vector<bool> sequence;
-	int size;
-	int val;
-	bool is_x;
-	bool is_sep=false; //mb dont even need this when we have val
-
-};
 block make_block(vector<bool> seq, bool is_x) {//just constructor for the block
 	block res;
 	res.is_x = is_x;
@@ -96,16 +103,32 @@ block make_block(vector<bool> seq, bool is_x) {//just constructor for the block
 
 	return res;
 }
-vector<vector<bool>> blockify(vector<bool> seq) {
-	vector<vector<bool>> blocks= vector<vector<bool>>();
+
+block make_block(vector<bool> seq) {//just constructor for the block
+	block res;
+	res.sequence = seq;
+	int v = 0;
+	for (bool b : seq) {
+		if (b)
+			v++;
+	}
+	res.val = v;
+	res.size = seq.size();
+	res.is_sep = (res.val == 0);
+
+
+
+	return res;
+}
+vector<block> blockify(vector<bool> seq) {
+	vector<block> blocks= vector<block>();
 	int i = 0;
 	while (!seq[i]) {
 		i++;
 	}
-	vector<bool> supp = vector<bool>(i, false);
+	block supp = make_block(vector<bool>(i, false));
 	blocks.push_back(supp);
 
-	int bi = 1; //block index
 	int j = 0;
 	while (i <= seq.size() - 1) {
 		j = i + 1;
@@ -118,8 +141,8 @@ vector<vector<bool>> blockify(vector<bool> seq) {
 			z += 1;
 		}
 
-		blocks.push_back(subset(seq, i, j - 1-z));
-		blocks.push_back(vector<bool>(z,false));
+		blocks.push_back(make_block(subset(seq, i, j - 1-z)));
+		blocks.push_back(make_block(vector<bool>(z,false)));
 		i = j;
 				
 
@@ -348,11 +371,11 @@ int matchings(vector<bool> seq, bool evenodd) {
 	return (matchings);
 }
 int subroutine1(vector<bool> seq) {
-	vector<vector<bool>> blocks = blockify(seq);
-	bool labels = first_label_x(blocks);
+	vector<block> blocks = blockify(seq);
+	//bool labels = first_label_x(blocks);
 
-	vector<vector<bool>> B1= subset(blocks, 0, 2);
-	vector<vector<bool>> B2 = subset(blocks, 3, blocks.size()-1);
+	//vector<vector<bool>> B1= subset(blocks, 0, 2);
+	//vector<vector<bool>> B2 = subset(blocks, 3, blocks.size()-1);
 	return 0;
 
 }
@@ -421,21 +444,15 @@ int main()
 	*/
 	for (string s: inps) {
 		cout << s << endl;
-		vector<vector<bool>>blocks = blockify(treat_input(s));
-		bool first_x = first_label_x(blocks);
-		vector<block> actual_blocks = {};
-		for (vector<bool> blockk : blocks) {
-			block real_block = make_block(blockk,first_x);
-			if (!real_block.is_sep) { first_x = !first_x; }
-			actual_blocks.push_back(real_block);
-		}
-		
-		for (block ab : actual_blocks) {
-			cout << (ab.is_sep ? "Sep: " : (ab.is_x? "  X: ":"  Y: ") );
-			for (bool b : ab.sequence) {
-				cout << b;
-			}
-			cout << endl << "Size: " << ab.size<<endl;
+		vector<block>blocks = blockify(treat_input(s));
+		label_blocks(blocks);
+		for (block b : blocks) {
+			cout << (b.is_sep ? "SEP: " : (b.is_x ? "  X: " : "  Y: "));
+			for (bool ba : b.sequence) { cout << ba; }
+
+			cout << endl;
+			cout << "Size: " << b.size << " Val: " << b.val << endl;
+
 		}
 	}
 
