@@ -41,7 +41,7 @@ bool cond(int a, int b, int A, int B) {
 }
 
 //true if it starts with x,false if it starts with y. They alternate so rest should be clear
-bool label_blocks(vector<vector<bool>> blocks) {
+bool first_label_x(vector<vector<bool>> blocks) {
 	int first=0;
 	int second=0;
 	for (int i = 1; i < blocks.size(); i += 4) {
@@ -70,6 +70,32 @@ bool label_blocks(vector<vector<bool>> blocks) {
 		return false;
 }
 //int show how many 0 are in the block sepators, or how many 1s in the blocks.
+
+struct block {
+	vector<bool> sequence;
+	int size;
+	int val;
+	bool is_x;
+	bool is_sep=false; //mb dont even need this when we have val
+
+};
+block make_block(vector<bool> seq, bool is_x) {//just constructor for the block
+	block res;
+	res.is_x = is_x;
+	res.sequence = seq;
+	int v = 0;
+	for (bool b : seq) {
+		if (b)
+			v++;
+	}
+	res.val = v;
+	res.size = seq.size();
+	res.is_sep = (res.val == 0); 
+	
+
+
+	return res;
+}
 vector<vector<bool>> blockify(vector<bool> seq) {
 	vector<vector<bool>> blocks= vector<vector<bool>>();
 	int i = 0;
@@ -160,7 +186,6 @@ string make_loop(int gap, char f, char inc, char dec) {
 	return(incstr + f + decstr + f);
 
 }
-
    /*
 	*	seq = boolvector to start the NF from
 	*	matches = number of H to put in the 'surface'
@@ -322,7 +347,15 @@ int matchings(vector<bool> seq, bool evenodd) {
 	}
 	return (matchings);
 }
+int subroutine1(vector<bool> seq) {
+	vector<vector<bool>> blocks = blockify(seq);
+	bool labels = first_label_x(blocks);
 
+	vector<vector<bool>> B1= subset(blocks, 0, 2);
+	vector<vector<bool>> B2 = subset(blocks, 3, blocks.size()-1);
+	return 0;
+
+}
 
 string run(string input) {
 
@@ -387,19 +420,22 @@ int main()
 	}
 	*/
 	for (string s: inps) {
-		vector<vector<bool>>blocks = blockify(treat_input(s));
-
-		cout << endl;
 		cout << s << endl;
-		bool cur_x = !label_blocks(blocks);
-		bool cur_sep = true;
+		vector<vector<bool>>blocks = blockify(treat_input(s));
+		bool first_x = first_label_x(blocks);
+		vector<block> actual_blocks = {};
+		for (vector<bool> blockk : blocks) {
+			block real_block = make_block(blockk,first_x);
+			if (!real_block.is_sep) { first_x = !first_x; }
+			actual_blocks.push_back(real_block);
+		}
 		
-		for (vector<bool> block : blocks) {
-			cout << endl << (cur_sep? "Seperat: " :(cur_x = !cur_x, (cur_x?"X block: ":"Y block: ")));
-			cur_sep = !cur_sep;
-			for (bool bo : block) {
-				cout << bo << " ";
+		for (block ab : actual_blocks) {
+			cout << (ab.is_sep ? "Sep: " : (ab.is_x? "  X: ":"  Y: ") );
+			for (bool b : ab.sequence) {
+				cout << b;
 			}
+			cout << endl << "Size: " << ab.size<<endl;
 		}
 	}
 
