@@ -32,7 +32,7 @@ vector<T> subset(vector<T> v, int first, int last) {
 }
 
 void brake() {
-	std::cout << "Enter to continue...";
+	std::cout << endl << "Enter to continue...";
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 }
@@ -40,6 +40,35 @@ bool cond(int a, int b, int A, int B) {
 	return((a < b) || ((a = b) && (A < B)));
 }
 
+//true if it starts with x,false if it starts with y. They alternate so rest should be clear
+bool label_blocks(vector<vector<bool>> blocks) {
+	int first=0;
+	int second=0;
+	for (int i = 1; i < blocks.size(); i += 4) {
+		for (bool b : blocks[i]) {
+			if (b)
+				first++;
+		}
+	}
+	for (int i = 3; i < blocks.size(); i += 4) {
+		for (bool b : blocks[i]) {
+			if (b)
+				second++;
+		}
+	}
+	if(first<second)
+		return true;
+	if (first == second) //if they are equal then X should have the most 1's in endpoints
+	{
+		if (blocks[0].size() == 0)//first block has an endpoint so x can be there
+			return true;
+		else
+			return (blocks.size() % 4 == 3); //This is true when last block has same parity as first block, and false otherwise
+			
+	}	
+	else
+		return false;
+}
 //int show how many 0 are in the block sepators, or how many 1s in the blocks.
 vector<vector<bool>> blockify(vector<bool> seq) {
 	vector<vector<bool>> blocks= vector<vector<bool>>();
@@ -346,7 +375,7 @@ int main()
 		"hhhhhhhhhhhhphphpphhpphhpphpphhpphhpphpphhpphhpphphphhhhhhhhhhhh",
 		"hhhhpppphhhhhhhhhhhhpppppphhhhhhhhhhhhppphhhhhhhhhhhhppphhhhhhhhhhhhppphpphhpphhpphph",
 		"pppppphphhppppphhhphhhhhphhpppphhpphhphhhhhphhhhhhhhhhphhphhhhhhhppppppppppphhhhhhhpphphhhpppppphphh",
-		"ppphhpphhhhpphhhphhphhphhhhpppppppphhhhhhpphhhhhhppppppppphphhphhhhhhhhhhhpphhhphhphpphphhhpppppphhh" };
+		"ppphhpphhhhpphhhphhphhphhhhpppppppphhhhhhpphhhhhhppppppppphphhphhhhhhhhhhhpphhhphhphpphphhhpppppphhh"};
 
 	/*
 	for (string inp : inps) {
@@ -357,23 +386,27 @@ int main()
 		system(command.c_str());
 	}
 	*/
-	
-	vector<bool>test = {0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,1,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,1,1,0,1,0,0,1,1,0,0,0,1};
-	vector<vector<bool>>b = blockify(test);
+	for (string s: inps) {
+		vector<vector<bool>>blocks = blockify(treat_input(s));
 
-
-	for (bool b : test) {
-		cout << b << " ";
-	}
-	cout << endl;
-
-	for (vector<bool> block : b) {
 		cout << endl;
-		for (bool bo : block) {
-			cout << bo << " ";
+		cout << s << endl;
+		bool cur_x = !label_blocks(blocks);
+		bool cur_sep = true;
+		
+		for (vector<bool> block : blocks) {
+			cout << endl << (cur_sep? "Seperat: " :(cur_x = !cur_x, (cur_x?"X block: ":"Y block: ")));
+			cur_sep = !cur_sep;
+			for (bool bo : block) {
+				cout << bo << " ";
+			}
 		}
 	}
 
+	cout << endl;
+
+	
+	cout << endl;
 
 	return(brake(),0);
 
