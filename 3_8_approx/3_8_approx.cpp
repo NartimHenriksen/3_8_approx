@@ -19,14 +19,56 @@
 #include <math.h>
 
 using namespace std;
-
+template<class T>
+vector<T> concatenate(vector<T> a, vector<T> b) {
+	b.insert(b.begin(),a.begin(), a.end());
+	return(b);
+}
+template <class T>
+vector<T> subset(vector<T> v, int first, int last) {
+	vector<T>::const_iterator f = v.begin() + first;
+	vector<T>::const_iterator l = v.begin() + 1+last;
+	return (vector<T>(f,l));
+}
 
 void brake() {
 	std::cout << "Enter to continue...";
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 }
+bool cond(int a, int b, int A, int B) {
+	return((a < b) || ((a = b) && (A < B)));
+}
 
+//int show how many 0 are in the block sepators, or how many 1s in the blocks.
+vector<int> blockify(vector<bool> seq) {
+	vector<vector<bool>> blocks;
+	return vector < int>(0);
+	int i = 0;
+	while (!seq[i]) {
+		i++;
+	}
+	blocks[0] = vector<bool>(i,0);
+	cout << blocks[0].size() << " " << blocks[0][0] << endl;
+
+	int bi = 1; //block index
+	int j = 0;
+	while (i <= seq.size() - 1) {
+		j = i + 1;
+		/*while (!seq[j]) { j++; } //j is next 1
+		if ((j - i) % 2 == 0){ //uneven is new block even is continue block
+
+			bv = concatenate(bv,seq.)
+		}
+		if number of 0 between is odd, add it to block length and continue
+		if even then end block and make sep
+		*/
+
+		//sep
+
+	}
+	
+}
 
 void count_h_parity(vector<bool> seq, vector<bool> &even, vector<bool> &uneven,int &e, int &o) {//can be modified ot return bool vectors
 	for (int i = 0; i < seq.size();i++) {
@@ -302,6 +344,8 @@ int main()
 		"hhhhpppphhhhhhhhhhhhpppppphhhhhhhhhhhhppphhhhhhhhhhhhppphhhhhhhhhhhhppphpphhpphhpphph",
 		"pppppphphhppppphhhphhhhhphhpppphhpphhphhhhhphhhhhhhhhhphhphhhhhhhppppppppppphhhhhhhpphphhhpppppphphh",
 		"ppphhpphhhhpphhhphhphhphhhhpppppppphhhhhhpphhhhhhppppppppphphhphhhhhhhhhhhpphhhphhphpphphhhpppppphhh" };
+
+	/*
 	for (string inp : inps) {
 		string fold=run(inp);
 		
@@ -309,8 +353,16 @@ int main()
 		std::string command = "python "+filename+ " " + inp + " "+ fold;
 		system(command.c_str());
 	}
-	
+	*/
+	vector<string> test;
+	test.push_back("Martin");
+	test.push_back("er");
+	test.push_back("den");
+	test.push_back("bedste");
+	test.push_back("fat");
+	test.push_back("det");
 
+	
 
 	return(brake(),0);
 
