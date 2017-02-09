@@ -222,39 +222,8 @@ void print_blocks(vector<block> blocks) {
 
 
 }
-//dont need 4 methods for this but im just gonna spam them to make the subroutine more readabke
-int m_xy(vector<block> A, vector<block> B) {
-	int XA=0;
-	int YB = 0;
-	for (block bloc : A) {
-		if (!bloc.is_sep && bloc.is_x) { //could do away with one of these checks if it was an actual label rather than bools. Not sure if Its needed.
-			XA += bloc.val;
-		}
-	}
-	for (block bloc : B) {
-		if (!bloc.is_sep && !bloc.is_x)
-			YB += bloc.val;
-	}
-	return (XA<YB?XA:YB);
-
-
-}
-int m_yx(vector<block> A, vector<block> B) {
-	int YA = 0;
-	int XB = 0;
-	for (block bloc : A) {
-		if (!bloc.is_sep && !bloc.is_x) { //could do away with one of these checks if it was an actual label rather than bools. Not sure if Its needed.
-			YA += bloc.val;
-		}
-	}
-	for (block bloc : B) {
-		if (!bloc.is_sep && bloc.is_x)
-			XB += bloc.val;
-	}
-	return (XB<YA ? XB : YA);
-}
-
-int M_xy(vector<block> A, vector<block> B) {
+//dont need 4 methods for this but im just gonna spam them to make the subroutine more readable
+int MXY(vector<block> A, vector<block> B, bool capital) {
 	int XA = 0;
 	int YB = 0;
 	for (block bloc : A) {
@@ -266,21 +235,26 @@ int M_xy(vector<block> A, vector<block> B) {
 		if (!bloc.is_sep && !bloc.is_x)
 			YB += bloc.val;
 	}
-	return (XA>YB ? XA : YB);
+	if(capital)
+		return (XA>YB ? XA : YB);
+	else
+		return (XA<YB ? XA : YB);
+
+}
+int m_xy(vector<block> A, vector<block> B) {
+	
+	return (MXY(A,B,false));
+
+
+}
+int m_yx(vector<block> A, vector<block> B) {
+	return (MXY(B,A,false));
+}
+int M_xy(vector<block> A, vector<block> B) {
+	return (MXY(A, B, true));
 }
 int M_yx(vector<block> A, vector<block> B) {
-	int YA = 0;
-	int XB = 0;
-	for (block bloc : A) {
-		if (!bloc.is_sep && !bloc.is_x) { //could do away with one of these checks if it was an actual label rather than bools. Not sure if Its needed.
-			YA += bloc.val;
-		}
-	}
-	for (block bloc : B) {
-		if (!bloc.is_sep && bloc.is_x)
-			XB += bloc.val;
-	}
-	return (XB>YA ? XB : YA);
+	return (MXY(B,A,true));
 
 }
 
@@ -461,7 +435,7 @@ pair<vector<block>,vector<block>> subroutine1(vector<bool> seq) {
 		Bp = B1; Bpp = B2; e = m_yx(B1, B2), E = M_yx(B1, B2);
 	}
 	int k = (blocks.size() - 1) / 2;
-	for (int i = 2; i < k; i++) {//be more literal if indexing goes wrong
+	for (int i = 2; i < k; i++) {
 		B1 = subset(blocks,0,i*2);
 		B2 = subset(blocks, 2 * i + 1, blocks.size() - 1);
 		if (cond(e, m_xy(B1,B2), E, M_xy(B1,B2))) {
@@ -560,8 +534,6 @@ int main()
 
 	cout << endl;
 
-	
-	cout << endl;
 
 	return(brake(),0);
 
