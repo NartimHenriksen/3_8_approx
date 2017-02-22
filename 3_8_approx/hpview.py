@@ -170,11 +170,12 @@ class HPFold:
                     print " ",
                 print " ",
             print
-
+		
         if self.legal_fold[0]:
             print "Score: %d" % (score)
         else:
             print "Illegal fold after %d steps" % (self.legal_fold[1]) 
+        return score##
 
 #####################################################################
 # Functions
