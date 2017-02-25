@@ -15,12 +15,13 @@
 //std::pair<vector<block>, vector<block>> subroutine2(vector<block> blocks);
 //vector<block> blockify(vector<bool> b);
 
+void visualize3D(std::string inp, std::string fold);
 void visualize(std::string inp, std::string fold);
 void brake();
 std::vector<bool> treat_input(std::string);
 
 std::string block2DA(std::string inp);
-std::string block2DB(std::string inp);
+std::string block2DB(std::string inp, std::string udlr="udlr");
 std::string simple2D(std::string inp);
 
 std::string block3D(std::string inp);

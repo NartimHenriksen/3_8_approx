@@ -28,7 +28,16 @@ int f(int x) {
 /******		Declared Functions		******/
 string normal_form(vector<bool> seq, int matches, string udlr, bool odds);
 string make_loop(int gap, char f, char inc, char dec);
+string make_loop_rel(int gap) {
 
+	if (gap == 0) {
+		return "ff";
+	}
+	else {
+		string fstr = string(gap - 1, 'f');
+		return ("l"+ fstr+"rr"+fstr +"l");
+	}
+}
 
 
 /******		Utility Functions		******/
@@ -69,11 +78,12 @@ vector<bool> treat_input(string s) {
 	}
 	return v;
 }
-/*std::vector<bool> reverse_vector(std::vector<bool>v)
+template<class T>
+std::vector<T> reverse_vector(std::vector<T>v)
 {
 std::reverse(v.begin(), v.end());
 return v;
-}*/
+}
 void visualize(string inp, string fold) {
 	//*** By Chrisitan Nørgaard storm***//
 	std::string filename = "hpview.py";
@@ -81,6 +91,42 @@ void visualize(string inp, string fold) {
 	system(command.c_str());
 
 }
+
+string normal_form_rel(vector<bool> seq, int matches, bool odds) {
+	if (seq.empty() || seq.size() == 1)
+		return "";
+	//check first one manually since we dont need to fold it. Then start from i=1
+	int placed = 0;
+	int gap = 0;
+	string fold = "";
+	if (odds) {
+		fold += 'f';
+		if (seq[1])
+			placed++;
+	}
+	else if (seq[0]) { placed++; }
+	int i = 1;
+
+	while (placed < matches) {
+		if (seq[2 * i + (odds ? 1 : 0)]) {
+			fold += make_loop_rel (gap);
+			placed++;
+			i++;
+			gap = 0;
+		}
+		else {
+			gap++;
+			i++;
+		}
+	}
+	return(fold);
+
+}
+
+
+
+
+
 
 /******		Blocks and Superblocks		******/
 
@@ -141,7 +187,7 @@ struct xysuperblock {
 		is_x_superblock = x;
 		blocks = blox;
 		for (block b : blocks) {
-			total_sequence_length += b.size;
+			total_sequence_length += b.size;///remove this stuff entirely??
 			if (b.is_x)
 				xval += b.val;
 			else
@@ -233,6 +279,83 @@ struct xysuperblock {
 
 		return res;
 
+	}
+	string superblock_normal_form_rel() {//f(orward) //l(eft) r(ight) up/down
+		//vector<block> blbl = blocks; //for debug
+		//leave out beginning sep blocks and then handle them after
+		string res = "";
+		int i = 0;
+		int begin_gap = 0;
+		while (i<blocks.size() && (blocks[i].val == 0 || !(blocks[i].is_x == is_x_superblock))) {// while i is in legal range AND either condition is not fulfilled
+			begin_gap += blocks[i].size;
+			//add then increase
+			i++;
+
+		}
+
+		if (begin_gap % 2 == 1) {
+			res += 'f';
+			begin_gap--;
+		}
+
+		if (begin_gap > 0) {
+			res += make_loop_rel((begin_gap / 2) - 1);
+		}
+
+		/*if (blocks[0].val == 0) {
+		if (blocks[0].size > 0) {
+
+		res += normal_fold.erase(0, 1); //cannot remove last
+		}
+		return(res+xysuperblock(subset(blocks, 1, blocks.size() - 1),is_x_superblock).superblock_normal_form(forward,inc,dec,udlr));
+		}
+		bool fold_first =(blocks[0].is_x == is_x_superblock); // !xor (x er først, superblock er x)
+		if (!fold_first) { //handlne beginning and then fold first
+
+		string normal_fold = make_loop(((blocks[0].size + blocks[1].size - 1) / 2), udlr[forward], udlr[inc], udlr[dec]);
+		res += normal_fold.erase(normal_fold.length()-1, 1); //Folds of even length er taken to be normal folds but with last char removed
+		i = 2;
+		}
+		*/
+		int a = (int)blocks.size();
+		//folding first from her on out
+		for (i; i < a; i += 4) {
+
+
+			if (i < a - 4) {//fiddle widdit
+							//fold one block to the face
+				res += normal_form_rel(blocks[i].sequence, blocks[i].val, false);
+				//loop next three around
+				res += make_loop_rel(
+					((blocks[i + 1].size + blocks[i + 2].size + blocks[i + 3].size) - 1) / 2);
+			}
+
+
+			else if (i == a - 4) {//The blocks all end with 0. So last non sep block is size-2. So this edge case has the last block to be folded on either size-4 or size-2.
+
+				res += normal_form_rel(blocks[i].sequence, blocks[i].val, false);
+
+				int gap = 0;
+				for (int j = i + 1; j < blocks.size(); j++) {//3 loops
+					gap = gap + blocks[j].size;
+				}
+
+				res += string(gap, 'f');
+			}
+			else {
+
+				res += normal_form_rel(blocks[i].sequence, blocks[i].val, false);
+				int gap = blocks[i + 1].size;
+				if (gap > 0) {
+					res += string(gap, 'f');
+				}
+
+			}
+			//Both methods were written for the first 2d thing, but will do. Can modified for efficiency
+		}
+
+		return res;
+	
 	}
 };
 bool first_label_x(vector<block> blocks) {
@@ -553,7 +676,7 @@ pair<vector<block>, vector<block>> subroutine2(vector<block> blocks) {
 
 
 ///makes a cusp for algorithm B by taking some aminos from the largest superblock and making a rel fold of them
-string exclude_and_fold(xysuperblock &sb, bool exclude_first) {
+string exclude_and_fold(xysuperblock &sb, bool exclude_first,string udlr="udlr") {
 	string res = "";
 	if (exclude_first) {
 		block exblock = sb.blocks[0];
@@ -561,7 +684,7 @@ string exclude_and_fold(xysuperblock &sb, bool exclude_first) {
 
 			int foldlength = sb.blocks[0].size + sb.blocks[1].size + sb.blocks[2].size + sb.blocks[3].size;
 			sb.blocks = subset(sb.blocks, 4, sb.blocks.size() - 1);
-			return(string(foldlength / 2, 'r') + "d" + string(foldlength / 2, 'l'));
+			return(string(foldlength / 2, udlr[3]) + udlr[1] + string(foldlength / 2, udlr[2]));
 			//superblock must exclude this, and the next sep, X and sep.
 		}
 		else {
@@ -572,7 +695,7 @@ string exclude_and_fold(xysuperblock &sb, bool exclude_first) {
 
 					sb.blocks[0] = block(subset(sb.blocks[0].sequence, i, sb.blocks[0].sequence.size() - 1),sb.blocks[0].is_x);
 					
-					return(string(i / 2, 'r') + "d" + string(i / 2, 'l'));
+					return(string(i / 2, udlr[3]) + udlr[1] + string(i / 2, udlr[2]));
 				}
 
 
@@ -586,7 +709,7 @@ string exclude_and_fold(xysuperblock &sb, bool exclude_first) {
 		if (exblock.val == 1) {
 			int foldlength = sb.blocks[ys - 4].size + sb.blocks[ys - 3].size + sb.blocks[ys - 2].size + sb.blocks[ys - 1].size+ sb.blocks[ys - 5].size;
 			sb.blocks = subset(sb.blocks, 0, ys - 6);
-			return(string(foldlength / 2, 'r') + "d" + string(foldlength / 2, 'l'));
+			return(string(foldlength / 2, udlr[3]) + udlr[1] + string(foldlength / 2, udlr[2]));
 		}
 		else {
 			for (int i = exblock.size - 3; i > -1; i -= 2) {
@@ -595,7 +718,7 @@ string exclude_and_fold(xysuperblock &sb, bool exclude_first) {
 					sb.blocks[ys - 2].val--;
 					
 					sb.blocks[ys - 2] = block(subset(sb.blocks[ys - 2].sequence, 0, i),sb.blocks[ys-2].is_x);
-					return(string((exblock.size - 1 - i )/ 2, 'r') + "d" + string((exblock.size - 1 - i )/ 2, 'l'));
+					return(string((exblock.size - 1 - i )/ 2, udlr[3]) + udlr[1] + string((exblock.size - 1 - i )/ 2, udlr[2]));
 				}
 
 			}
@@ -681,7 +804,7 @@ string block2DA(string inp)
 	return(fold);
 
 }
-string block2DB(string inp)
+string block2DB(string inp, string udlr) //modded to accomodate nsew coords
 {
 
 	int count;
@@ -722,34 +845,34 @@ string block2DB(string inp)
 			X.blocks[X.blocks.size() - 1] = block(vector<bool>());
 		}
 		else { Y.blocks[Y.blocks.size() - 1] = block(vector<bool>()); }
-		superfold = string(zi.size / 2,'r')+"d"+ string(zi.size / 2, 'l');
+		superfold = string(zi.size / 2,udlr[3])+udlr[1]+ string(zi.size / 2, udlr[2]);
 
 	}
 	else if (Y.yval > X.xval) {
 		//b
 		//we are excluding from y. If y is first, we exclude the last. If y is last we exclude its first
 		bool exclude_first = superblock_x_first;
-		superfold = exclude_and_fold(Y,exclude_first);
+		superfold = exclude_and_fold(Y,exclude_first,udlr);
 	}
 	else {
 		//c
 		bool exclude_first = !superblock_x_first;
-		superfold = exclude_and_fold(X, exclude_first);
+		superfold = exclude_and_fold(X, exclude_first,udlr);
 	}
 	///////////////////superfold now contains rel fold and superblocks are modified to fit
 
 	
 	string fold;
 	if (superblock_x_first) {
-		string xfold = X.superblock_normal_form("udlr");
-		string yfold = Y.superblock_normal_form("durl");
+		string xfold = X.superblock_normal_form(udlr);
+		string yfold = Y.superblock_normal_form(string(1,udlr[1])+udlr[0]+udlr[3]+udlr[2]);
 		fold = xfold + superfold + yfold;
 
 	}
 	else {
 
-		string yfold = Y.superblock_normal_form("udlr");
-		string xfold = X.superblock_normal_form("durl");
+		string yfold = Y.superblock_normal_form(udlr);
+		string xfold = X.superblock_normal_form(string(1,udlr[1]) +udlr[0]+ udlr[3]+ udlr[2]);
 		fold = yfold + superfold + xfold;
 	}
 
@@ -765,10 +888,31 @@ string block2DB(string inp)
 	return(fold);
 
 }
+/*template <class BidirectionalIterator>
+void reverse(BidirectionalIterator first, BidirectionalIterator last)
+{
+	while ((first != last) && (first != --last)) {
+		std::iter_swap(first, last);
+		++first;
+	}
+}*/
 
+
+/////////////// First run subroutine2 and remove the middle part from first vector. Then reverse first vector then fold it forward. Then reverse the fold. Then add the middle. Then fold part2 forward.
 ///////////////
 ///////////////
-///////////////
+
+
+
+string reversefold(string fold) {
+	std::reverse(fold.begin(), fold.end());
+	for (int i = 0; i < fold.length(); i++) {
+		if (fold[i] == 'l') { fold[i] = 'r'; }
+		else if (fold[i] == 'r') { fold[i] = 'l'; }
+	}
+	fold.erase(fold.length()-1,1);
+	return "f" + fold;
+}
 string block3D(string inp) {
 
 	int count;
@@ -779,15 +923,18 @@ string block3D(string inp) {
 	vector<block> p1;
 	vector<block> p2;
 	pair<vector<block>, vector<block>> split = subroutine2(blocks); //find the split point
-	p1 = split.first;
-	p2 = split.second;
+	
+	
+	p1 = split.first;//X
+	p2 = split.second;//Y
+	vector<block> first;
+	
 
 	//make superblocks from blocks
 	xysuperblock X(p1, true);
-	xysuperblock Y(p2, false);
+	xysuperblock Y(p2, false); //think its ok to do this on reversed version
 
-
-	//Below part makes fold and modifies the block it came from
+							   //Below part makes fold and modifies the block it came from
 	block zi = block(vector<bool>()); //must initialize?
 	bool superblock_x_first;
 	if (X.blocks[0].val == 0) {
@@ -807,7 +954,7 @@ string block3D(string inp) {
 			X.blocks[X.blocks.size() - 1] = block(vector<bool>());
 		}
 		else { Y.blocks[Y.blocks.size() - 1] = block(vector<bool>()); }
-		superfold = string(zi.size / 2, 'r') + "d" + string(zi.size / 2, 'l');
+		superfold = string(zi.size / 2, 'r') + "d" + string(zi.size / 2, 'l'); //make rel if using this
 
 	}
 	else if (Y.yval > X.xval) {
@@ -824,6 +971,28 @@ string block3D(string inp) {
 	//superfold now contains fold and superblocks are modified to fit
 
 
+	/* reversing first superblock*/
+
+	/*
+	if (split.first[0].val == 0) {
+		first = split.first;
+		p1 = reverse_vector(p1);
+		for (int i = 0; i < p1.size(); i++) { //reverse all the blocks inside
+			p1[i] = block(reverse_vector(p1[0].sequence));
+		}
+	}
+	else {
+		first = split.second;
+		p2 = reverse_vector(p2);
+		for (int i = 0; i < p2.size(); i++) { //reverse all the blocks inside
+			p2[i] = block(reverse_vector(p2[0].sequence));
+		}
+	}
+	*/
+
+
+
+
 	//matchings is the 2nd lowest line
 	//lines: LB, matchings, actual score, UB
 	int matchings = min(X.xval, Y.yval);
@@ -833,53 +1002,115 @@ string block3D(string inp) {
 	if (k == 1 || j < 2) {
 		return block2DB(inp);
 	}
-
+	
 
 	string fold;
-	for (int t = 0; t < k; t++) {
-		//make xsauperblock of length j
-		//make ysauperblock of length j
-	
-		//if even fold them going up
-		//else fold them going down
-		
-		
-		//if t<k-1 make connection to next plane (new type of fold)
-		 //new fold either go nextplane and slide to other side or go around, go next plane and slide in
-		//else do fold
+	int prev = 0;//index of last elements of previous piece
+	int iter=0;
+	int c;
+	//map approach: map "match 1's to indices of string"
+
+	int itr = 0;
+	int itsb = 0;
+	xysuperblock* fir;
+	if (superblock_x_first) { fir = &X; }
+	else { fir = &Y; }
+	xysuperblock f = *(fir);//f is literally the same pointer as X or Y, whatever is first
+
+	vector<int> boolmap = vector<int>(f.total_sequence_length);//bigger than it needs to be
+	for (int i = 0; i < f.blocks.size(); i++) {
+		if (f.blocks[i].val > 0 && f.blocks[i].is_x==f.is_x_superblock) { //if block i is right type
+													   //scan block and add 1s to map
+			for (int ii = 0; ii < f.blocks[i].size; (itr++, ii++)) {
+				if (f.blocks[i].sequence[ii]) { //found one
+					boolmap[itsb] = itr;
+					itsb++;
+				}
+
+			}
+
+		}
+		else { //else skip to the next
+			itr += f.blocks[i].size;
+		}
+
+	}//boolmap set
+	vector<bool> raw = treat_input(inp);
+	int off=0;//accumulated offset
+	for (int t = 0; t < k; t++) { //will need to include the off(set) in this loop header
+
+		int from = boolmap[t*j+off];//index of jth 1 of correct parity (in iteration t), offs excluded
+		int to = boolmap[(t + 1)*j-1+off];
+		vector<bool> piece = subset(raw, from, to);
+		xysuperblock sbpiece = xysuperblock(blockify(piece),f.is_x_superblock); //make superblock of same parity as f with the piece from from to to
+		if (t%2==0) {
+			fold += sbpiece.superblock_normal_form_rel(); //the main part. 
+
+			//switch and slide
+			fold += "ur"; //extend u/d in rel with information about direction facing?? like un and us. this would then be unr   //switch levels and slide. Also remove residues used in switch and slide
+			//int to = boolmap[(t + 1)*j - 1];
+
+
+			int last_one = to;// boolmap[(t + 1)*j + off]; //made before incrementing off below!
+			//boolmap[last_one +1] == [last one] + 2
+			if (boolmap[(t + 1)*j +off] == last_one+2)//boolmap[(t + 1)*j + off] + 2) //if the next one is spaced by only one, exclude it
+				off++;
+			int first_one = boolmap[(t + 1)*j + off]; //points to the nextone that can be placed. distance is first_one-last_one
+			int distance = first_one - last_one;
+			int gap = (distance-2) / 2 - 1;
+			string foldstr = make_loop_rel(gap);
+			if (foldstr[0] == 'f') { foldstr[0] = 'r'; }
+			else if (foldstr[0] == 'l') { foldstr[0] = 'f'; }
+			fold += foldstr;
+
+			//replace first char: if f then r but if l then f
+			//fold += slide_fold()
+			//first abs then split?
+		}
+		else {
+			//main part folding down
+			fold += sbpiece.superblock_normal_form_rel();
+
+
+			//wrap part
+			int distance = boolmap[(t + 1)*j + off]-to;
+			int distance2 = boolmap[(t + 1)*j + off+1] - boolmap[(t + 1)*j + off];
+
+			string wrap = string(distance / 2 - 1, 'f') + "rr" + string(distance / 2 - 1, 'f');
+			string wrap2 = string(distance2 / 2 - 1, 'f') + "rr" + string(distance2 / 2 - 1, 'f');
+			if (wrap[0] == 'r') { wrap[0] = 'f'; }
+			else // wrap[0] == 'f'
+				wrap[0] = 'l';
+			if (wrap2[0] == 'r') { wrap2[0] = 'f'; }
+			else // wrap[0] == 'f'
+				wrap2[0] = 'l';
+			fold = fold + wrap + wrap2;
+			off += 2;
+			//boolmap[(t + 1)*j + off] now points to the one after distance to. Can name this value and make the indexing more readable
+			
+			
+			//switch and slide
+			int distance3 = boolmap[(t + 1)*j + off]- boolmap[(t + 1)*j + off-1];
+			if (distance3 == 2) {
+				off++;
+				distance3 = boolmap[(t + 1)*j + off] - boolmap[(t + 1)*j + off - 1];
+			}
+			
+			string sas = string(distance3 / 2 - 1, 'f') + "rr" + string(distance3 / 2 - 1, 'f');
+			sas[0] = 'u';
+			sas[distance3 - 1] = 'l';
+			if (sas[1] == 'r')
+				sas[1] = 'f';
+			else //its 'f' then
+				sas[1] = 'l';
+			//go around, switch and slide.
+			fold += sas;
+		}
+
 	}
+	string rev = reversefold(fold);
+	reversefold(fold);
+	//todo: pre and post reverse, middle
 
-	//fold the parts and put the superfold in between
-	/*
-	if (superblock_x_first) {
-		string xfold = X.superblock_normal_form("udlr");
-		string yfold = Y.superblock_normal_form("durl");
-		fold = xfold + superfold + yfold;
-
-		//std::replace(superfold.begin(), superfold.end(), 'x', 'y'); // replace all 'x' to 'y'
-		//		fold = xfold + superforld + yfold;
-	}
-	else {
-
-		string yfold = Y.superblock_normal_form("udlr");
-		string xfold = X.superblock_normal_form("durl");
-		fold = yfold + superfold + xfold;
-	}
-
-	if (superblock_x_first) {
-		string xfold = X.superblock_normal_form("udlr");
-		string yfold = Y.superblock_normal_form("durl");
-		fold = xfold + superfold + yfold;
-
-	}
-	else {
-
-		string yfold = Y.superblock_normal_form("udlr");
-		string xfold = X.superblock_normal_form("durl");
-		fold = yfold + superfold + xfold;
-	}
-	*/
-
-	//string twodfold = block2D(inp);
 	return(fold);
 }

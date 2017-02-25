@@ -30,3 +30,10 @@ void pop_front(std::vector<T>& vec)
 	vec.erase(vec.begin());
 }
 
+void visualize3D(std::string inp, std::string fold) {
+	//*** By Chrisitan Nørgaard storm***//
+	std::string filename = "hpview3D.py";
+	std::string command = "python " + filename + " " + inp + " " + fold;
+	system(command.c_str());
+
+}
