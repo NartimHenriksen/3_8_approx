@@ -904,6 +904,7 @@ void reverse(BidirectionalIterator first, BidirectionalIterator last)
 
 
 
+/* rel reversefold that doesnt work using U and D in abs
 string reversefold(string fold) {
 	std::reverse(fold.begin(), fold.end());
 	for (int i = 0; i < fold.length(); i++) {
@@ -912,8 +913,9 @@ string reversefold(string fold) {
 	}
 	fold.erase(fold.length()-1,1);
 	return "f" + fold;
-}
-string block3D(string inp) {
+}*/
+
+string block3D(string inp,string udlr) {
 
 	int count;
 	count = 0;
@@ -1004,19 +1006,28 @@ string block3D(string inp) {
 	}
 	
 
-	string fold;
-	int prev = 0;//index of last elements of previous piece
-	int iter=0;
-	int c;
-	//map approach: map "match 1's to indices of string"
 
-	int itr = 0;
-	int itsb = 0;
 	xysuperblock* fir;
 	if (superblock_x_first) { fir = &X; }
 	else { fir = &Y; }
 	xysuperblock f = *(fir);//f is literally the same pointer as X or Y, whatever is first
 
+
+	//reverse part 1 before folding it
+	
+	for (int i = 0; i < f.blocks.size(); i++) {
+		//block b = f.blocks[i];
+
+		f.blocks[i] = block(reverse_vector(f.blocks[i].sequence),f.blocks[i].is_x);
+	}
+	f.blocks = reverse_vector(f.blocks);
+	//reverse done
+
+	//make boolmap from f
+	int prev = 0;//index of last elements of previous piece
+	int iter = 0;
+	int itr = 0;
+	int itsb = 0;
 	vector<int> boolmap = vector<int>(f.total_sequence_length);//bigger than it needs to be
 	for (int i = 0; i < f.blocks.size(); i++) {
 		if (f.blocks[i].val > 0 && f.blocks[i].is_x==f.is_x_superblock) { //if block i is right type
@@ -1035,6 +1046,9 @@ string block3D(string inp) {
 		}
 
 	}//boolmap set
+
+	////forward fold using boolmap (and the bool in f)
+	string fold;
 	vector<bool> raw = treat_input(inp);
 	int off=0;//accumulated offset
 	for (int t = 0; t < k; t++) { //will need to include the off(set) in this loop header
@@ -1108,8 +1122,17 @@ string block3D(string inp) {
 		}
 
 	}
-	string rev = reversefold(fold);
-	reversefold(fold);
+	///forward fold done
+
+	//reversing the fold the dumb way//
+	//string abs = rel2abs(fold,udlr);
+	//string rev = absrev(abs,udlr);
+	//string rel = abs2rel(rev, udlr);
+	//reversing done //
+
+
+	//string rev = reversefold(fold);
+	//reversefold(fold);
 	//todo: pre and post reverse, middle
 
 	return(fold);

@@ -11,7 +11,7 @@
 #include <iostream>
 #include <math.h>
 #include <algorithm>
-
+using namespace std;
 //std::pair<vector<block>, vector<block>> subroutine2(vector<block> blocks);
 //vector<block> blockify(vector<bool> b);
 
@@ -24,8 +24,11 @@ std::string block2DA(std::string inp);
 std::string block2DB(std::string inp, std::string udlr="udlr");
 std::string simple2D(std::string inp);
 
-std::string block3D(std::string inp);
+std::string block3D(std::string inp, string udlr="nswe");
 double time_simple2d(int iterations, std::string inp);
 double time_block2DA(int iterations, std::string inp);
 //double time_block2DB(int iterations, std::string inp);
+std::string rel2abs(std::string rel, string udlr);
+std::string abs2rel(std::string abs, string udlr);
+std::string absrev(std::string abs, string udlr);
 std::string hp_gen(const int length);

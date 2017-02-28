@@ -69,7 +69,13 @@ int main()
 		
 		visualize3D(t,block2f);
 		visualize3D(t, block3f);
-		
+		cout << t << endl;
+		cout << block2f << endl;
+
+		string rel = abs2rel(block2f,"nswe");
+		string abs = rel2abs(rel, "nswe");
+		cout << rel << endl;
+		cout << rel2abs(rel,"nswe") << endl;
 		
 		//ss << iterations << "," << i << "," << sim << "," << block << endl;//csv format
 		//ss >> a;
