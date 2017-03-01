@@ -72,7 +72,7 @@ int main()
 		cout << block3f << endl;
 		//cout << absrev(block3f,"UDLRFB") << endl;
 		//cout << rel2abs(block3f,"UDLRFB")<<endl;
-		//cout << t << endl;
+		cout << t << endl;
 		//cout << block2f << endl;
 
 		

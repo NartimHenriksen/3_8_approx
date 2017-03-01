@@ -1111,8 +1111,8 @@ string block3D(string inp,string udlr) {
 		int to = boolmap[(t + 1)*j-1+off];
 		vector<bool> piece = subset(raw, from, to);
 
-		block first = f.blocks[0];
-		if (first.val == 0) { first = f.blocks[1]; }
+		block first = f.blocks[from];
+		if (first.val == 0) { first = f.blocks[from+1]; }
 
 		xysuperblock sbpiece = xysuperblock(blockify(piece,first.is_x),f.is_x_superblock); //This constructor decides on X and Y using the standard rules but it needs to take over from f instead!!
 		if (t%2==0) {
@@ -1233,7 +1233,7 @@ string block3D(string inp,string udlr) {
 
 
 
-	xysuperblock s = *(sec);//f is literally the same pointer as X or Y, whatever is first
+	xysuperblock s = *(sec);
 
 	//boolmap from s
 	prev = 0;//index of last elements of previous piece
@@ -1241,8 +1241,8 @@ string block3D(string inp,string udlr) {
 	itr = 0;
 	itsb = 0;
 	boolmap = vector<int>(s.total_sequence_length);//bigger than it needs to be
-	for (int i = 0; i < f.blocks.size(); i++) {
-		if (f.blocks[i].val > 0 && f.blocks[i].is_x == s.is_x_superblock) { //if block i is right type
+	for (int i = 0; i < s.blocks.size(); i++) {
+		if (s.blocks[i].val > 0 && s.blocks[i].is_x == s.is_x_superblock) { //if block i is right type
 																			//scan block and add 1s to map
 			for (int ii = 0; ii < s.blocks[i].size; (itr++, ii++)) {
 				if (s.blocks[i].sequence[ii]) { //found one
@@ -1262,8 +1262,7 @@ string block3D(string inp,string udlr) {
 	 ////forward fold using boolmap (and the bool in s)
 	fold="";
 	raw = treat_input(inp);
-	subs = subset(raw, 0, s.total_sequence_length - 1);
-	raw = reverse_vector(subs);
+	raw = subset(raw, raw.size()- s.total_sequence_length, raw.size() - 1);
 	n = raw.size();
 
 	off = 0;//accumulated offset
@@ -1272,13 +1271,20 @@ string block3D(string inp,string udlr) {
 		int from = boolmap[t*j + off];//index of jth 1 of correct parity (in iteration t), offs excluded
 		int to = boolmap[(t + 1)*j - 1 + off];
 		vector<bool> piece = subset(raw, from, to);
+		//locate the block that contains from. Only used to set label :/
+		block first=s.blocks[0]; //Must initialize it???
+		int a = 0;
+		for (int i = 0; i < s.blocks.size(); i++) {
+			if (a<=from && a + s.blocks[i].size-1>=from) { //check if this fixes from block
+				first = s.blocks[i];
+				break;
+			}
+			a += s.blocks[i].size;
+		}
 
-		block first = s.blocks[0];
-		if (first.val == 0) { first = f.blocks[1]; }
-
-		xysuperblock sbpiece = xysuperblock(blockify(piece, first.is_x), s.is_x_superblock); //This constructor decides on X and Y using the standard rules but it needs to take over from f instead!!
+		xysuperblock sbpiece = xysuperblock(blockify(piece, first.is_x), s.is_x_superblock); 
 		if (t % 2 == 1) {//oppostite first part
-			fold += sbpiece.superblock_normal_form_rel(); //the main part. 
+			part3 += sbpiece.superblock_normal_form_rel(); //the main part. 
 
 														  //switch and slide
 														  //int to = boolmap[(t + 1)*j - 1];
@@ -1294,18 +1300,18 @@ string block3D(string inp,string udlr) {
 			if (first_one == 0)
 			{
 				distance = n - 1 - last_one;
-				fold += "ur";
-				fold += string(distance - 2, 'u');//maybe somethingl ess ugly is posisble
+				part3 += "ur";
+				part3 += string(distance - 2, 'u');
 				break;
 			}
 
-			fold += "ur";
+			part3 += "ur";
 			distance = first_one - last_one;
 			int gap = (distance - 2) / 2 - 1;
 			string foldstr = make_loop_rel(gap);
 			if (foldstr[0] == 'f') { foldstr[0] = 'r'; }
 			else if (foldstr[0] == 'l') { foldstr[0] = 'f'; }
-			fold += foldstr;
+			part3 += foldstr;
 
 			//replace first char: if f then r but if l then f
 			//fold += slide_fold()
@@ -1313,7 +1319,7 @@ string block3D(string inp,string udlr) {
 		}
 		else {
 			//main part folding down
-			fold += sbpiece.superblock_normal_form_rel();
+			part3 += sbpiece.superblock_normal_form_rel();
 
 
 			//wrap part
@@ -1328,21 +1334,30 @@ string block3D(string inp,string udlr) {
 			if (wrap2[0] == 'r') { wrap2[0] = 'f'; }
 			else // wrap[0] == 'f'
 				wrap2[0] = 'l';
-			fold = fold + wrap + wrap2;
+			part3 = part3 + wrap + wrap2;
 			off += 2;
 			//boolmap[(t + 1)*j + off] now points to the one after distance to. Can name this value and make the indexing more readable
 
 
 			//switch and slide
+			int slideindex = (t + 1)*j + off;
+			if (boolmap[slideindex] == 0)//end of the line (and no more 1s to pair so who cares)
+			{
+				while (part3.length() < s.total_sequence_length - 1) {//when to stop?
+					part3 += 'f';
+				}
+				break;
+			}
+
 			int distance3 = boolmap[(t + 1)*j + off] - boolmap[(t + 1)*j + off - 1];
 			if (distance3 == 2) {
 				off++;
 				int trie = boolmap[(t + 1)*j + off];
 				if (trie == 0)//end of the line
 				{
-					fold += "uf";
-					if (fold.size() < n - 1)
-						fold += "r";
+					part3 += "uf";
+					if (part3.size() < n - 1)
+						part3 += "r";
 					break;
 				}
 				distance3 = trie - boolmap[(t + 1)*j + off - 2];
@@ -1356,10 +1371,11 @@ string block3D(string inp,string udlr) {
 			else //its 'f' then
 				sas[1] = 'l';
 			//go around, switch and slide.
-			fold += sas;
+			part3 += sas;
 		}
 
 	}
+	part3 = rel2abs(part3,udlr);
 	///forward fold done
 
 
@@ -1377,5 +1393,6 @@ string block3D(string inp,string udlr) {
 	////yay done!!!
 
 
-	return(part1+part2+part3);
+	//return(part1+part2+part3);
+	return(part2+part3);
 }
