@@ -74,9 +74,9 @@ string rel2abs(string rel, string udlr) {
 			dir = (dir+4 - 1) % 4;
 			res += rdlu[dir];
 		}if (c == 'u') {
-			res += 'u';
+			res += udlr[4];
 		}if (c == 'd') {
-			res += 'd';
+			res += udlr[5];
 		}
 	}
 	return res;
@@ -89,7 +89,7 @@ string abs2rel(string abs, string udlr) {
 	int dir = 0;
 	string res = "";
 	int pint = 0;
-	int cint;
+	int cint=0;
 	for (char c : abs) {
 		if (c == 'u' || c == 'd') {
 			res += c;

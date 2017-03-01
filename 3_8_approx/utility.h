@@ -24,7 +24,7 @@ std::string block2DA(std::string inp);
 std::string block2DB(std::string inp, std::string udlr="udlr");
 std::string simple2D(std::string inp);
 
-std::string block3D(std::string inp, string udlr="nswe");
+std::string block3D(std::string inp, string udlr="nsweud");
 double time_simple2d(int iterations, std::string inp);
 double time_block2DA(int iterations, std::string inp);
 //double time_block2DB(int iterations, std::string inp);

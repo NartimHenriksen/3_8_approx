@@ -64,18 +64,17 @@ int main()
 
 		//simf = simple2D(t);
 		string block2f = block2DB(t,"nswe");
-		string block3f = block3D(t);
+		string block3f = block3D(t,"UDLRFB");
 		//tdf = block3D(t);
 		
-		visualize3D(t,block2f);
-		visualize3D(t, block3f);
-		cout << t << endl;
-		cout << block2f << endl;
+		//visualize3D(t,block2f);
+		//visualize3D(t, block3f);
+		cout << block3f << endl;
+		//cout << absrev(block3f,"UDLRFB") << endl;
+		//cout << rel2abs(block3f,"UDLRFB")<<endl;
+		//cout << t << endl;
+		//cout << block2f << endl;
 
-		string rel = abs2rel(block2f,"nswe");
-		string abs = rel2abs(rel, "nswe");
-		cout << rel << endl;
-		cout << rel2abs(rel,"nswe") << endl;
 		
 		//ss << iterations << "," << i << "," << sim << "," << block << endl;//csv format
 		//ss >> a;
