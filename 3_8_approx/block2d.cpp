@@ -1300,12 +1300,12 @@ string block3D(string inp,string udlr) {
 			if (first_one == 0)
 			{
 				distance = n - 1 - last_one;
-				part3 += "ur";
-				part3 += string(distance - 2, 'u');
+				part3 += "dr";
+				part3 += string(distance - 2, 'd');
 				break;
 			}
 
-			part3 += "ur";
+			part3 += "dr";
 			distance = first_one - last_one;
 			int gap = (distance - 2) / 2 - 1;
 			string foldstr = make_loop_rel(gap);
@@ -1355,7 +1355,7 @@ string block3D(string inp,string udlr) {
 				int trie = boolmap[(t + 1)*j + off];
 				if (trie == 0)//end of the line
 				{
-					part3 += "uf";
+					part3 += "df";
 					if (part3.size() < n - 1)
 						part3 += "r";
 					break;
@@ -1364,7 +1364,7 @@ string block3D(string inp,string udlr) {
 			}
 
 			string sas = string(distance3 / 2 - 1, 'f') + "rr" + string(distance3 / 2 - 1, 'f');
-			sas[0] = 'u';
+			sas[0] = 'd';
 			sas[distance3 - 1] = 'l';
 			if (sas[1] == 'r')
 				sas[1] = 'f';
@@ -1395,4 +1395,5 @@ string block3D(string inp,string udlr) {
 
 	//return(part1+part2+part3);
 	return(part2+part3);
+	//return(part1+part2);
 }
