@@ -56,15 +56,18 @@ int main()
 	std::string blockf;
 	std::string tdf;
 	static int iterations = 1;
-	for (int i = 100; i < 110; i=i+1) {
+	for (int i = 20; i < 500; i=i+1) {
 		string t = hp_gen(i);
 
 		//sim = time_simple2d(iterations,t);
 		//block = time_block2d(iterations,t);
 
 		//simf = simple2D(t);
-		string block2f = block2DB(t,"nswe");
+
+
+		//string block2f = block2DB(t,"nswe");
 		string block3f = block3D(t,"UDLRFB");
+
 		//tdf = block3D(t);
 		
 		//visualize3D(t,block2f);
@@ -72,7 +75,10 @@ int main()
 		cout << block3f << endl;
 		//cout << absrev(block3f,"UDLRFB") << endl;
 		//cout << rel2abs(block3f,"UDLRFB")<<endl;
-		cout << t << endl;
+		for (char c : t) {
+			cout << (char)toupper(c);
+		}
+		cout << endl;
 		//cout << block2f << endl;
 
 		
