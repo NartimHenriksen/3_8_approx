@@ -55,9 +55,8 @@ int main()
 	std::string blockf;
 	std::string tdf;
 	static int iterations = 1;
-	for (int i = 20; i < 1000; i=i+1) {
+	for (int i = 100; i < 101; i=i+1) {
 		string t = hp_gen(i);
-
 		//sim = time_simple2d(iterations,t);
 		//block = time_block2d(iterations,t);
 

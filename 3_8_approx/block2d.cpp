@@ -20,8 +20,8 @@ vector<T> subset(vector<T> v, int first, int last) {
 	return (vector<T>(f, l));
 }
 int f(int x) {
-	return ((int)sqrt(x));
-	//return((int)(log(x) / log(2))); //try sqrt?
+	//return ((int)sqrt(x));
+	return((int)(log(x) / log(2))); //try sqrt?
 }
 
 
@@ -969,7 +969,6 @@ string block3D(string inp, string udlr) {
 	vector<block> first;
 
 
-	//make superblocks from blocks
 	xysuperblock X(p1, true);
 	xysuperblock Y(p2, false); 
 
@@ -1025,7 +1024,7 @@ string block3D(string inp, string udlr) {
 	int matchings = min(X.xval, Y.yval);
 	int k = f(matchings);
 	int j = (matchings - 2 * k + 1) / k;
-
+	cout << "matchings: " << matchings << " k: " << k << " j: " << j << endl;
 	if (k == 1 || j < 2) {
 		return block2DB(inp);
 	}
@@ -1085,17 +1084,24 @@ string block3D(string inp, string udlr) {
 	for (int t = 0; true; t++) { //will need to include the off(set) in this loop header
 
 		int fromprod = t*j + off;
-		if (fromprod >= boolmap.size()) { fold = pad(fold, f,true); break; }
+		if (fromprod >= boolmap.size()) {
+			fold = pad(fold, f,true);
+			break;
+		}
 		int from = boolmap[t*j + off];//index of jth 1 of correct parity (in iteration t), offs excluded
 		int toprod = (t + 1)*j - 1 + off;
 		if (toprod >= boolmap.size()) {
 
-			fold = pad(fold, f,true);//not actually done, should fold remaining somehow.
-			break;
+			vector<bool> piece = subset(raw, from, boolmap[boolmapsize-1]);
 
+			
+			xysuperblock sbpiece = xysuperblock(blockify(piece, superblock_x_first), f.is_x_superblock);
+			fold += sbpiece.superblock_normal_form_rel(true);
+			fold = pad(fold, f, true);
+			break;
 		}
 		int to = boolmap[toprod];
-		vector<bool> piece = subset(raw, from, to); //sadly must label the pieces accordingly. Look below
+		vector<bool> piece = subset(raw, from, to); 
 
 												
 		bool piecepar = superblock_x_first;
@@ -1146,11 +1152,24 @@ string block3D(string inp, string udlr) {
 			//wrap part
 			
 			int prod = (t + 1)*j + off;
-			if (prod >= boolmapsize) { fold = pad(fold, f, true); break; }
+			if (prod >= boolmapsize)
+			{fold = pad(fold, f, true); break; }
 			int distance = boolmap[prod] - to;
 			
 			prod = prod + 1;
-			if (prod >= boolmapsize) { fold = pad(fold, f, true); break; }
+			if (prod >= boolmapsize)
+			{//We are wrapping but only have one more monomer. Lets do half a wrap
+
+				string wrap = string(distance / 2 - 1, 'f') + "ll" + string(distance / 2 - 1, 'f');
+				if (wrap[0] == 'l') { wrap[0] = 'f'; }
+				else 
+					wrap[0] = 'r';
+				fold += wrap;
+				//off++; wouldve been needed if not because we are done
+				fold = pad(fold, f, true);
+				break;
+			
+			}
 			int distance2 = boolmap[prod] - boolmap[prod-1];
 			
 			string wrap = string(distance / 2 - 1, 'f') + "ll" + string(distance / 2 - 1, 'f');
@@ -1276,11 +1295,16 @@ string block3D(string inp, string udlr) {
 	off = 0;//accumulated offset
 	for (int t = 0; true; t++) { //will need to include the off(set) in this loop header
 		int from, to;
-		from = boolmap[t*j + off];//can prolly do this outside the if
+		from = boolmap[t*j + off];
 		
 		int prod = (t + 1)*j + off - 1;
 		if (prod >= boolmapsize) {
+			vector<bool> piece = subset(raw, from, boolmap[boolmapsize - 1]);
+
+			xysuperblock sbpiece = xysuperblock(blockify(piece, !superblock_x_first), s.is_x_superblock);
+			part3 += sbpiece.superblock_normal_form_rel(false);
 			part3 = pad(part3, s, false);
+			
 			break;
 		}
 
@@ -1324,7 +1348,7 @@ string block3D(string inp, string udlr) {
 
 		xysuperblock sbpiece = xysuperblock(blockify(piece, pieceparity), s.is_x_superblock);
 		if (t % 2 == 1) {//oppostite first part
-			part3 += sbpiece.superblock_normal_form_rel(); //the main part. 
+			part3 += sbpiece.superblock_normal_form_rel(false); //the main part. 
 
 														   //switch and slide
 														   //int to = boolmap[(t + 1)*j - 1];

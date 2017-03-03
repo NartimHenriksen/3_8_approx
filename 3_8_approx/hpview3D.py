@@ -1,8 +1,9 @@
 #! /usr/bin/python
+# -*- coding: utf-8 -*-
 #
-#  hpview.py
+#  hpview3D.py
 #
-#  Displays a 2D HP folding
+#  Displays a 3D HP folding
 #
 #  Usage:
 #
@@ -11,22 +12,15 @@
 #  where <seq> is a string over the alphabet {h,p} and <fold> is a
 #  folding of the string in either relative or absolute format.
 #
-#  A folding in relative format is a sequence over {f,l,r}, which
-#  describes the fold as a sequence of steps (f)orward, (l)left, or
-#  (r)ight.
 #
-#  A folding in absolute format is a sequence over {n,s,e,w}, which
-#  describes the fold as a sequence of steps to the (n)orth, (s)outh,
-#  (e)east, or (w)est.
+#  A folding in absolute format is a sequence over {U,D,L,R,F,B}, which
+#  describes the fold as a sequence of steps going
+#  up, down, left or right, or forwards and backwards
+#  If an 'H' or 'h' s(cores) with an H-monomer in the layer "before it" (the one printed before),
+#  it is instead denoted with 'S' or 's'. If it neighbours an element in it, it is marked with ρ,ĥ or Ĥ.
 #
-#  History:
+#  Originially conceived by Christian Storm, and extended to 3D by Martin Henriksen
 #
-#  31-Oct-2007: Initial version.
-#  30-Nov-2007: Hydrophobes at even positions are drawn as 'H' and
-#  hydrophobes at odd positions are drawn as 'h'.
-#  28-Oct-2008: Fixed counting of score.
-#
-#  Christian Storm Pedersen <cstorm@birc.au.dk>.
 
 import sys
 
@@ -50,22 +44,6 @@ class HPFold:
 
     def __len__ (self):
         return len(self.seq)
-        
-    def SetRelFold (self, relfold):
-        """
-        Fold seq according to a description in relavtive format, i.e.
-        a sequence of {f,l,r}'s which describe each step as (f)orward,
-        (l)eft, or (r)ight.
-        """
-        turn = {'f':0, 'l':-1, 'r':1}
-        direction = {0:'e', 1:'s', 2:'w', 3:'n'}
-        absfold = []
-        curr = 0
-        for relstep in relfold:
-            absstep = (curr + turn[relstep]) % 4
-            absfold.append(direction[absstep])
-            curr = absstep
-        return self.SetAbsFold(absfold)
 
     def SetAbsFold (self, absfold):
         """
@@ -75,28 +53,34 @@ class HPFold:
         """
         self.legal_fold = (True, 0)
         self.grid = {}
-        self.grid[0,0] = [0]
-        i = j = self.min_i= self.max_i = self.min_j = self.max_j = 0
+        self.grid[0,0,0] = [0]
+        i = j = l = self.min_i= self.max_i = self.min_j = self.max_j = self.min_l = self.max_l = 0
         k = 1
         for step in absfold:
-            if step == 'n':
+            if step == 'u':
                 i = i - 1
-            elif step == 's':
+            elif step == 'd':
                 i = i + 1
-            elif step == 'e':
+            elif step == 'r':
                 j = j + 1
-            elif step == 'w':
+            elif step == 'l':
                 j = j - 1
-            if self.grid.has_key((i,j)):
+            elif step == 'f':
+                l = l - 1
+            elif step == 'b':
+                l = l + 1
+            if self.grid.has_key((i,j,l)):
                 self.legal_fold = (False, k)
-                self.grid[i,j].append(k)
+                self.grid[i,j,l].append(k)
             else:
-                self.grid[i,j] = [k]
+                self.grid[i,j,l] = [k]
             k = k + 1
             self.min_i = min(i, self.min_i)
             self.max_i = max(i, self.max_i)
             self.min_j = min(j, self.min_j)
-            self.max_j = max(j, self.max_j)                        
+            self.max_j = max(j, self.max_j)     
+            self.min_l = min(l, self.min_l)
+            self.max_l = max(l, self.max_l)                      
         return self.legal_fold[0]
 
     def ContainNeighbors(self, l1, l2):
@@ -131,45 +115,77 @@ class HPFold:
         """
         score = 0
         print
-        for i in xrange(self.min_i, self.max_i+1):
-            for j in xrange(self.min_j, self.max_j+1):
-                if self.grid.has_key((i,j)):
-                    l1 = self.grid[i,j]
-                    if len(l1) == 1:
-                        print self.seq[l1[0]],
+
+        for l in xrange(self.max_l,self.min_l-1,-1):
+            for i in xrange(self.min_i, self.max_i+1):
+                for j in xrange(self.min_j, self.max_j+1):
+                    if self.grid.has_key((i,j,l)):
+                        l1 = self.grid[i,j,l]
+
+                        neighborsAbove=False
+                        scoresAbove=False
+                        if self.grid.has_key((i,j,l+1)):
+                            l3 = self.grid[i,j,l+1]
+                            if self.ContainNeighbors(l1,l3):
+                                neighborsAbove=True
+                            elif self.ContainHHs(l1, l3):
+                                scoresAbove=True
+                                score = score + 1
+
+                        if len(l1) == 1:
+                            if neighborsAbove:
+                                if self.seq[l1[0]]=="h":
+                                    print "\xc4\xa5",
+
+                                elif self.seq[l1[0]]=="H":
+                                    print "\xc4\xa4",
+                                else:
+                                    print "\xCF\x81", #cant put a caret on a p for some reason
+                            elif scoresAbove:
+                                if self.seq[l1[0]]=="h":
+                                    print "s",
+                                else:
+                                    print "S",
+                            else:
+                                print self.seq[l1[0]],
+
+                        else:
+                            print "X",
+
+
+                        if self.grid.has_key((i,j+1,l)):
+                            l2 = self.grid[i,j+1,l]
+                            if self.ContainNeighbors(l1,l2):
+                                print "-",
+                            elif self.ContainHHs(l1, l2):
+                                print "*",
+                                score = score + 1
+                            else:
+                                print " ",
+                        else:
+                            print " ",
                     else:
-                        print "X",
-                    if self.grid.has_key((i,j+1)):
-                        l2 = self.grid[i,j+1]
+                        print ".",
+                        print " ",
+                print
+
+                for j in xrange(self.min_j, self.max_j+1):
+                    if self.grid.has_key((i,j,l)) and self.grid.has_key((i+1,j,l)):
+                        l1 = self.grid[i,j,l]
+                        l2 = self.grid[i+1,j,l]
                         if self.ContainNeighbors(l1,l2):
-                            print "-",
-                        elif self.ContainHHs(l1, l2):
+                            print "|",
+                        elif self.ContainHHs(l1,l2):
                             print "*",
                             score = score + 1
                         else:
                             print " ",
                     else:
                         print " ",
-                else:
-                    print ".",
                     print " ",
-            print
+                print
 
-            for j in xrange(self.min_j, self.max_j+1):
-                if self.grid.has_key((i,j)) and self.grid.has_key((i+1,j)):
-                    l1 = self.grid[i,j]
-                    l2 = self.grid[i+1,j]
-                    if self.ContainNeighbors(l1,l2):
-                        print "|",
-                    elif self.ContainHHs(l1,l2):
-                        print "*",
-                        score = score + 1
-                    else:
-                        print " ",
-                else:
-                    print " ",
-                print " ",
-            print
+            print '----'*((self.max_j+1)-self.min_j)
 		
         if self.legal_fold[0]:
             print "Score: %d" % (score)
@@ -185,17 +201,10 @@ def make_absfold(f):
 
     absfold = []
     for c in f.lower():
-        if c == 'n' or c == 's' or c == 'e' or c == 'w' or 'u' or 'd':
+        if c == 'u' or c == 'd' or c == 'l' or c == 'r' or c=='f' or c=='b':
             absfold.append(c)
     return absfold
 
-def make_relfold(f):
-
-    relfold = []
-    for c in f.lower():
-        if c == 'f' or c == 'l' or c == 'r' or c == 'u' or c == 'd':
-            relfold.append(c)
-    return relfold
 
 
 
@@ -205,18 +214,16 @@ Usage:
 
 hpview.py <seq> <fold>
 
-Displays  folding <fold> of sequence  <seq> in the  2D HP model, where
-<seq> is a string over the  alphabet {h,p} and  <fold> is a folding of
-<seq> in either relative or absolute format. The length of <fold> must
-be exactly one less than the length of <seq>.
 
-A folding in    relative format is   a sequence  over  {f,l,r},  which
-describes  the fold  as a sequence  of  steps  (f)orward, (l)left,  or
-(r)ight.
+  where <seq> is a string over the alphabet {h,p} and <fold> is a
+  folding of the string in either relative or absolute format.
 
-A folding  in  absolute format  is  a  sequence  over {n,s,e,w}, which
-describes the  fold as a sequence of   steps to the  (n)orth, (s)outh,
-(e)east, or (w)est.              
+
+  A folding in absolute format is a sequence over {U,D,L,R,F,B}, which
+  describes the fold as a sequence of steps going
+  up, down, left, right, forwards or backwards.
+  If an 'H' or 'h' s(cores) with an H-monomer in the layer "before it" (the one printed before),
+  it is instead denoted with 'S' or 's'. If it neighbours an element in it, it is marked with ρ,ĥ or Ĥ.
 """
     
 #####################################################################
