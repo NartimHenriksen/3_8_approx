@@ -1,4 +1,4 @@
-
+ï»¿
 #include "stdafx.h"
 #include "utility.h"
 #include <time.h>
@@ -75,7 +75,7 @@ std::reverse(v.begin(), v.end());
 return v;
 }*/
 void visualize(string inp, string fold) {
-	//*** By Chrisitan Nørgaard storm***//
+	//*** By Chrisitan Nï¿½rgaard storm***//
 	std::string filename = "hpview.py";
 	std::string command = "python " + filename + " " + inp + " " + fold;
 	system(command.c_str());
@@ -180,7 +180,7 @@ struct xysuperblock {
 		}
 		return(res+xysuperblock(subset(blocks, 1, blocks.size() - 1),is_x_superblock).superblock_normal_form(forward,inc,dec,udlr));
 		}
-		bool fold_first =(blocks[0].is_x == is_x_superblock); // !xor (x er først, superblock er x)
+		bool fold_first =(blocks[0].is_x == is_x_superblock); // !xor (x er fï¿½rst, superblock er x)
 		if (!fold_first) { //handlne beginning and then fold first
 
 		string normal_fold = make_loop(((blocks[0].size + blocks[1].size - 1) / 2), udlr[forward], udlr[inc], udlr[dec]);
