@@ -20,7 +20,6 @@ int main()
 		"hhhhpppphhhhhhhhhhhhpppppphhhhhhhhhhhhppphhhhhhhhhhhhppphhhhhhhhhhhhppphpphhpphhpphph",
 		"pppppphphhppppphhhphhhhhphhpppphhpphhphhhhhphhhhhhhhhhphhphhhhhhhppppppppppphhhhhhhpphphhhpppppphphh",
 		"ppphhpphhhhpphhhphhphhphhhhpppppppphhhhhhpphhhhhhppppppppphphhphhhhhhhhhhhpphhhphhphpphphhhpppppphhh" };
-	cout << string(15 / 2, 'r') << endl;
 	/*
 
 	///block
@@ -56,18 +55,30 @@ int main()
 	std::string blockf;
 	std::string tdf;
 	static int iterations = 1;
-	for (int i = 15; i < 100; i=i+1) {
+	for (int i = 100; i < 101; i=i+1) {
 		string t = hp_gen(i);
-
 		//sim = time_simple2d(iterations,t);
 		//block = time_block2d(iterations,t);
 
 		//simf = simple2D(t);
-		//blockf = block2DB(t);
-		tdf = block3D(t);
+
+
+		//string block2f = block2DB(t,"nswe");
+		string block3f = block3D(t,"UDLRFB");
+
+		//tdf = block3D(t);
 		
-		visualize(t,tdf);
-		
+		//visualize3D(t,block2f);
+		//visualize3D(t, block3f);
+		cout << block3f << endl;
+		//cout << absrev(block3f,"UDLRFB") << endl;
+		//cout << rel2abs(block3f,"UDLRFB")<<endl;
+		for (char c : t) {
+			cout << (char)toupper(c);
+		}
+		cout << endl;
+		//cout << block2f << endl;
+
 		
 		//ss << iterations << "," << i << "," << sim << "," << block << endl;//csv format
 		//ss >> a;
