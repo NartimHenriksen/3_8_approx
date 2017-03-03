@@ -20,7 +20,6 @@ int main()
 		"hhhhpppphhhhhhhhhhhhpppppphhhhhhhhhhhhppphhhhhhhhhhhhppphhhhhhhhhhhhppphpphhpphhpphph",
 		"pppppphphhppppphhhphhhhhphhpppphhpphhphhhhhphhhhhhhhhhphhphhhhhhhppppppppppphhhhhhhpphphhhpppppphphh",
 		"ppphhpphhhhpphhhphhphhphhhhpppppppphhhhhhpphhhhhhppppppppphphhphhhhhhhhhhhpphhhphhphpphphhhpppppphhh" };
-	cout << string(15 / 2, 'r') << endl;
 	/*
 
 	///block
@@ -56,7 +55,7 @@ int main()
 	std::string blockf;
 	std::string tdf;
 	static int iterations = 1;
-	for (int i = 20; i < 500; i=i+1) {
+	for (int i = 20; i < 1000; i=i+1) {
 		string t = hp_gen(i);
 
 		//sim = time_simple2d(iterations,t);

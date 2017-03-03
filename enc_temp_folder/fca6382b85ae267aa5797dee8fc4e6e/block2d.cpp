@@ -220,7 +220,21 @@ struct xysuperblock {
 			res += make_loop((begin_gap / 2) - 1, udlr[3], udlr[0], udlr[1]);
 		}
 
-	
+		/*if (blocks[0].val == 0) {
+		if (blocks[0].size > 0) {
+
+		res += normal_fold.erase(0, 1); //cannot remove last
+		}
+		return(res+xysuperblock(subset(blocks, 1, blocks.size() - 1),is_x_superblock).superblock_normal_form(forward,inc,dec,udlr));
+		}
+		bool fold_first =(blocks[0].is_x == is_x_superblock); // !xor (x er først, superblock er x)
+		if (!fold_first) { //handlne beginning and then fold first
+
+		string normal_fold = make_loop(((blocks[0].size + blocks[1].size - 1) / 2), udlr[forward], udlr[inc], udlr[dec]);
+		res += normal_fold.erase(normal_fold.length()-1, 1); //Folds of even length er taken to be normal folds but with last char removed
+		i = 2;
+		}
+		*/
 		int a = (int)blocks.size();
 		//folding first from her on out
 		for (i; i < a; i += 4) {
