@@ -934,7 +934,7 @@ string block3D(string inp, string udlr,bool logdata) {
 	int n = raw.size();
 
 	int off = 0;//accumulated offset
-	for (int t = 0; true; t++) { //will need to include the off(set) in this loop header
+	for (int t = 0; true; t++) { 
 
 		int fromprod = t*j + off;
 		if (fromprod >= boolmap.size()) {
@@ -1226,7 +1226,7 @@ string block3D(string inp, string udlr,bool logdata) {
 			int prod = (t + 1)*j + off;
 			if (prod >= boolmap.size()) {
 				if (part3.length() < s.total_sequence_length - 1) {
-	//				part3 += 'f';
+					part3 += 'f';
 				}
 				part3 = pad(part3, s,false);
 				break;
