@@ -310,7 +310,7 @@ struct xysuperblock {
 		for (i; i < a; i += 4) {
 
 
-			if (i < a - 4) {//fiddle widdit
+			if (i < a - 4) {
 							//fold one block to the face
 				res += normal_form_rel(blocks[i].sequence, blocks[i].val, false, mirrored);
 				//loop next three around
@@ -470,83 +470,7 @@ vector<block> blockify(vector<bool> seq, bool fixed_label) { //option for fixed 
 	return blocks;
 
 }
-/*
-block make_block(vector<bool> seq, bool is_x) {//just constructor for the block
-block res;
-res.is_x = is_x;
-res.sequence = seq;
-int v = 0;
-for (bool b : seq) {
-if (b)
-v++;
-}
-res.val = v;
 
-
-
-return res;
-}
-block make_block(vector<bool> seq) {//just constructor for the block
-block res;
-res.sequence = seq;
-int v = 0;
-for (bool b : seq) {
-if (b)
-v++;
-}
-res.val = v;
-res.size = seq.size();
-
-
-
-return res;
-}
-*/
-
-
-
-/*****		Subroutine 1. ***/
-int MXY(vector<block> A, vector<block> B, bool capital) {
-
-	//clock_t st = clock();
-	int XA = 0;
-	int YB = 0;
-	for (block bloc : A) {
-		if (bloc.is_x) //can be true when its a sep block, but val will be 0 anyway
-			XA += bloc.val;
-	}
-	for (block bloc : B) {
-		if (!bloc.is_x)
-			YB += bloc.val;
-	}
-
-	//clock_t end = clock();
-	//double post = ((double)(end - st) * 1000 / CLOCKS_PER_SEC);
-	//cout << "MXY: " << post << " millisecs" << endl;
-	if (capital)
-		return (XA>YB ? XA : YB);
-	else
-		return (XA<YB ? XA : YB);
-
-
-}
-/*
-int m_xy(vector<block> A, vector<block> B) {
-
-return (MXY(A, B, false));
-
-
-}
-int m_yx(vector<block> A, vector<block> B) {
-return (MXY(B, A, false));
-}
-int M_xy(vector<block> A, vector<block> B) {
-return (MXY(A, B, true));
-}
-int M_yx(vector<block> A, vector<block> B) {
-return (MXY(B, A, true));
-
-}*/
 /*
 *	seq = boolvector to start the NF from
 *	matches = number of H to put in the 'surface'
@@ -554,77 +478,7 @@ return (MXY(B, A, true));
 *	used = reference for the function to pass back how many bools it consumed from seq
 *	odds = true iff we are matching odds. Turned out to be nessecary
 */
-pair<vector<block>, vector<block>> subroutine1(vector<block> blocks) {
 
-	vector<block> B1 = subset(blocks, 0, 2);
-	vector<block> B2 = subset(blocks, 3, blocks.size() - 1);
-	vector<block> Bp;
-	vector<block> Bpp;
-	int e;
-	int E;
-	if (MXY(B1, B2, false) > MXY(B2, B1, false)) {
-		Bp = B2; Bpp = B1; e = MXY(B1, B2, false), E = MXY(B1, B2, true);
-	}
-	else {
-		Bp = B1; Bpp = B2; e = MXY(B2, B1, false), E = MXY(B2, B1, true);
-	}
-	int k = (blocks.size() - 1) / 2;
-	for (int i = 2; i < k; i++) {
-		B1 = subset(blocks, 0, i * 2);
-		B2 = subset(blocks, 2 * i + 1, blocks.size() - 1);
-		if (cond(e, MXY(B1, B2, false), E, MXY(B1, B2, true))) {
-			Bp = B2; Bpp = B1; e = MXY(B1, B2, false); E = MXY(B1, B2, true);
-		}
-		if (cond(e, MXY(B2, B1, false), E, MXY(B2, B1, true))) {
-			Bp = B1; Bpp = B2; e = MXY(B2, B1, false); E = MXY(B2, B1, true);
-		}
-	}
-
-	return{ Bpp,Bp };
-
-}
-
-pair<vector<block>, vector<block>> time_subroutine1(vector<block> blocks) {
-	//clock_t start, end;
-
-	vector<block> B1 = subset(blocks, 0, 2);
-	vector<block> B2 = subset(blocks, 3, blocks.size() - 1);
-	vector<block> Bp;
-	vector<block> Bpp;
-	int e;
-	int E;
-	int mxy = MXY(B1, B2, false);
-	int myx = MXY(B2, B1, false);
-	int Mxy = MXY(B1, B2, true);
-	int Myx = MXY(B2, B1, true);
-
-	if (mxy > myx) {
-		Bp = B2; Bpp = B1; e = mxy, E = Mxy;
-	}
-	else {
-		Bp = B1; Bpp = B2; e = myx, E = Myx;
-	}
-	int k = (blocks.size() - 1) / 2;
-	//start = clock();
-	for (int i = 2; i < k; i++) {
-		B1 = subset(blocks, 0, i * 2);
-		B2 = subset(blocks, 2 * i + 1, blocks.size() - 1);
-		mxy = MXY(B1, B2, false);
-		if (e > mxy || (e == mxy && E > (Mxy = MXY(B1, B2, true), Mxy))) {
-
-			Bp = B2; Bpp = B1; e = mxy; E = Mxy;
-		}
-		if (e > myx || (e == myx && E > (Myx = MXY(B2, B1, true), Myx))) {
-
-			Bp = B1; Bpp = B2; e = myx; E = Myx;
-		}
-	}
-	//end = clock();
-	//double time = ((double)(end - start)) * 1000 / CLOCKS_PER_SEC;
-	//	cout << "loop zone of subroutine 1: " << time << " ms" << endl;
-	return{ Bpp,Bp };
-
-}
 pair<vector<block>, vector<block>> subroutine2(vector<block> blocks) {
 	//clock_t start, end;
 
@@ -983,33 +837,40 @@ string block3D(string inp, string udlr,bool logdata) {
 		superblock_x_first = false;
 	}
 	string superfold;
-	/*if (zi.size>0 || Y.yval == X.xval) {
+	int sflen=1;
+	if (zi.size>0) {//if zi>0 then fold with it (take it out of the first block)
 		//a
-		//damn were using rel stuff after all
-		if (superblock_x_first) { //empty from first superblock
+		if (superblock_x_first) { 
+
  			X.blocks[X.blocks.size() - 1] = block(vector<bool>());
 			X.total_sequence_length -= zi.size;
-			X.xval--;
+			sflen = zi.size + 1;
 		}
 		else {
 
 			Y.blocks[Y.blocks.size() - 1] = block(vector<bool>());
 			Y.total_sequence_length -= zi.size;
-			Y.yval--;
+			sflen = zi.size + 1;
 		}
-		superfold = string(zi.size / 2, 'r') + "d" + string(zi.size / 2, 'l'); //make rel if using this
+		
+
 
 	}
-	else */if (Y.yval > X.xval) {
+	else if (Y.yval == X.xval) {
+			sflen = 1;
+	}
+	else if (Y.yval > X.xval) {
 		//b
 		//we are excluding from y. If y is first, we exclude the last. If y is last we exclude its first
 		bool exclude_first = superblock_x_first;
 		superfold = exclude_and_fold(Y, exclude_first);
+		sflen = superfold.size();
 	}
 	else {
 		//c
 		bool exclude_first = !superblock_x_first;
 		superfold = exclude_and_fold(X, exclude_first);
+		sflen = superfold.size();
 	}
 	//superfold now contains fold and superblocks are modified to fit
 
@@ -1223,12 +1084,9 @@ string block3D(string inp, string udlr,bool logdata) {
 	//reversing done //
 
 
-	//string rev = reversefold(fold);
-	//reversefold(fold);
-	//todo: pre and post reverse, middle
 
 	string part1 = rev;
-	int sflen = superfold.size();
+	//int sflen = superfold.size();
 	string part2 = rel2abs(string((sflen - 1) / 2, 'u') + 'l' + string((sflen - 1) / 2, 'd'), udlr);
 	string part3;
 
@@ -1440,18 +1298,18 @@ string block3D(string inp, string udlr,bool logdata) {
 			dataout.close();
 		}
 		else {
+
 			layercount;
 			vector<block> seq = blockify(treat_input(inp));
 			xysuperblock b(seq, true);
 			int minxy = min(b.xval, b.yval);
-			int matched = matchings; //often literally half of minxy :/
-			//int layerUB = (1 + minxy / j); //more precise?
 
 			int UB = 4 * minxy;
+			/*
+			
 
 
 			//LB. Remember we are only counting the matches for whichever side is smallest.
-			int LBmons = (minxy+1)/ 2; //we can match at least half
 			int LBlayerlimit = LBmons/ j-1; //a guess at the no of layers for below calc. The -1 is to bring it closer to experimental results. Only matters for small n
 			int LBlayermons = LBmons - LBlayerlimit - 3 * LBlayerlimit/ 2; //monomers used in the actual main part. I.E. without the skip spots and folding parts
 			int LBlayers = (1 + (LBlayermons) / j); //how many layers we can actually make once the skipped monomers are removed
@@ -1470,7 +1328,84 @@ string block3D(string inp, string udlr,bool logdata) {
 			int arr = 3 * (arrlayermons); //Layer mons contribution
 			arr += 3 * (arrlayers + 1) / 2; // wrap mons contribution
 			arr -= 2 * j; //End layers give 1 less
+			*/
 
+			int LBmons = (minxy + 1) / 2; //we can match at least half
+			int LBlayermons = 0;
+			int LBwrapmons = 0;
+			int LBskipmons = 0;
+
+			for (int i = 0; i < LBmons;) { //count worst case monomers in 3 categs
+
+				int c = 0;
+				while (c < j && i < LBmons) {
+					LBlayermons++;
+					i++;
+					c++;
+				}
+				c = 0;
+				while (c < 3 && i < LBmons) {
+					LBwrapmons++;
+					i++;
+					c++;
+				}
+
+				if (i < LBmons) {
+					LBskipmons++;
+					i++;
+				}
+				c = 0;
+				while (c < j && i < LBmons) {
+					LBlayermons++;
+					i++;
+					c++;
+				}
+				if (i < LBmons) {
+					LBskipmons++;
+					i++;
+				}
+
+			} 
+			int LB = 3 * LBlayermons + 1 * LBwrapmons;
+
+
+			
+			int arrmons = matchings; //often literally half of minxy :/
+			int arrlayermons = 0;
+			int arrwrapmons = 0;
+			int arrskipmons = 0;
+			for (int i = 0; i < arrmons;) { //count categs for our matching
+
+				int c = 0;
+				while (c < j && i < arrmons) {
+					arrlayermons++;
+					i++;
+					c++;
+				}
+				c = 0;
+				while (c < 3 && i < arrmons) {
+					arrwrapmons++;
+					i++;
+					c++;
+				}
+
+				if (i < arrmons) {
+					arrskipmons++;
+					i++;
+				}
+				c = 0;
+				while (c < j && i < arrmons) {
+					arrlayermons++;
+					i++;
+					c++;
+				}
+				if (i < LBmons) {
+					arrskipmons++;
+					i++;
+				}
+
+			}
+			int arr = 3 * arrlayermons + 1 * arrwrapmons;
 
 			ofstream dataout;
 			dataout.open("3Ddata.txt", ios::app);
