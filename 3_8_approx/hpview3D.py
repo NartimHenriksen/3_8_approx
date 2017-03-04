@@ -17,7 +17,7 @@
 #  describes the fold as a sequence of steps going
 #  up, down, left or right, or forwards and backwards
 #  If an 'H' or 'h' s(cores) with an H-monomer in the layer "before it" (the one printed before),
-#  it is instead denoted with 'S' or 's'. If it neighbours an element in it, it is marked with ρ,ĥ or Ĥ.
+#  it is instead denoted with 'S' or 's'. If it neighbours an element in it, it is marked with q, w or W.
 #
 #  Originially conceived by Christian Storm, and extended to 3D by Martin Henriksen
 #
@@ -109,12 +109,13 @@ class HPFold:
                     res = True
         return res
         
-    def PrintFold (self):
+    def PrintFold (self,visual=True):
         """
         Print fold and output its score
         """
         score = 0
-        print
+        if visual:
+            print
 
         for l in xrange(self.max_l,self.min_l-1,-1):
             for i in xrange(self.min_i, self.max_i+1):
@@ -131,61 +132,79 @@ class HPFold:
                             elif self.ContainHHs(l1, l3):
                                 scoresAbove=True
                                 score = score + 1
+                        if visual:#dont even enter here unless visual
+                            if len(l1) == 1:
+                                if neighborsAbove:
+                                    if self.seq[l1[0]]=="h":
+                                        print "w", #"\xc4\xa5",
 
-                        if len(l1) == 1:
-                            if neighborsAbove:
-                                if self.seq[l1[0]]=="h":
-                                    print "\xc4\xa5",
+                                    elif self.seq[l1[0]]=="H":
+                                        print "W",#"\xc4\xa4",
+                                    else:
+                                        print "q",
+                                elif scoresAbove:
+                                    if self.seq[l1[0]]=="h":
+                                        print "s",
+                                    else:
+                                        print "S",
+                                else:
+                                    print self.seq[l1[0]],
 
-                                elif self.seq[l1[0]]=="H":
-                                    print "\xc4\xa4",
-                                else:
-                                    print "\xCF\x81", #cant put a caret on a p for some reason
-                            elif scoresAbove:
-                                if self.seq[l1[0]]=="h":
-                                    print "s",
-                                else:
-                                    print "S",
                             else:
-                                print self.seq[l1[0]],
-
-                        else:
-                            print "X",
+                                print "X",
 
 
                         if self.grid.has_key((i,j+1,l)):
                             l2 = self.grid[i,j+1,l]
                             if self.ContainNeighbors(l1,l2):
-                                print "-",
+                                if visual:
+                                    print "-",
                             elif self.ContainHHs(l1, l2):
-                                print "*",
+                                if visual:
+                                    print "*",
                                 score = score + 1
                             else:
-                                print " ",
+                                if visual:
+                                    print " ",
                         else:
-                            print " ",
+                            if visual:
+                                print " ",
                     else:
-                        print ".",
-                        print " ",
-                print
+                        if visual:
+                            print ".",
+                            print " ",
+                if visual:
+                    print
 
                 for j in xrange(self.min_j, self.max_j+1):
                     if self.grid.has_key((i,j,l)) and self.grid.has_key((i+1,j,l)):
                         l1 = self.grid[i,j,l]
                         l2 = self.grid[i+1,j,l]
                         if self.ContainNeighbors(l1,l2):
-                            print "|",
+                            if visual:
+                                print "|",
                         elif self.ContainHHs(l1,l2):
-                            print "*",
+
+                            if visual:
+                                print "*",
                             score = score + 1
                         else:
-                            print " ",
-                    else:
-                        print " ",
-                    print " ",
-                print
 
-            print '----'*((self.max_j+1)-self.min_j)
+                            if visual:
+                                print " ",
+                    else:
+
+                        if visual:
+                            print " ",
+
+                    if visual:
+                        print " ",
+
+                if visual:
+                    print
+
+            if visual:
+                print '----'*((self.max_j+1)-self.min_j)
 		
         if self.legal_fold[0]:
             print "Score: %d" % (score)
@@ -223,7 +242,7 @@ hpview.py <seq> <fold>
   describes the fold as a sequence of steps going
   up, down, left, right, forwards or backwards.
   If an 'H' or 'h' s(cores) with an H-monomer in the layer "before it" (the one printed before),
-  it is instead denoted with 'S' or 's'. If it neighbours an element in it, it is marked with ρ,ĥ or Ĥ.
+  it is instead denoted with 'S' or 's'. If it neighbours an element in it, it is marked with q,w or W.
 """
     
 #####################################################################
@@ -247,17 +266,13 @@ if __name__ == "__main__":
         sys.exit(1)
         
     absfold = make_absfold(sys.argv[2])
-    relfold = make_relfold(sys.argv[2])
-
-    if len(absfold) != len(sys.argv[2]) and len(relfold) != len(sys.argv[2]):
+    if len(absfold) != len(sys.argv[2]):
         print
         print "The folding %s contains illegal characters." % (sys.argv[2])
         sys.exit(1)
         
     if len(absfold) == len(seq) - 1:
         seq.SetAbsFold(absfold)
-    elif len(relfold) == len(seq) - 1:
-        seq.SetRelFold(relfold)
     else:
         print
         print "The folding %s has wrong length." % (sys.argv[2])

@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "utility.h"
-
 using namespace std;
 int main()
 {
@@ -55,35 +54,34 @@ int main()
 	std::string blockf;
 	std::string tdf;
 	static int iterations = 1;
-	for (int i = 100; i < 101; i=i+1) {
+	for (int i = 100; i < 100000; i=i*=1.1) { //1.1 for real test
+
 		string t = hp_gen(i);
-		//sim = time_simple2d(iterations,t);
-		//block = time_block2d(iterations,t);
-
-		//simf = simple2D(t);
 
 
-		//string block2f = block2DB(t,"nswe");
-		string block3f = block3D(t,"UDLRFB");
 
-		//tdf = block3D(t);
+		string block3f = block3D(t,"UDLRFB",true);
 		
-		//visualize3D(t,block2f);
 		//visualize3D(t, block3f);
-		cout << block3f << endl;
-		//cout << absrev(block3f,"UDLRFB") << endl;
-		//cout << rel2abs(block3f,"UDLRFB")<<endl;
-		for (char c : t) {
-			cout << (char)toupper(c);
-		}
-		cout << endl;
+		
+		//cout << block3f << endl;
+
+		//for (char c : t) {
+		//	cout << (char)toupper(c);
+		//}
+		//cout << endl;
 		//cout << block2f << endl;
 
 		
 		//ss << iterations << "," << i << "," << sim << "," << block << endl;//csv format
-		//ss >> a;
-		//cout << a << endl;
-		//std::string command = "echo " + t + " " + simf + " " + blockf + " >> " + "folds.txt";
+		ofstream foldout;
+		//ofstream dataout;
+		foldout.open("3Dfolds.txt",ios::app);
+		foldout << t << " " << block3f << endl;//to be handled by lol.py
+		foldout.close();
+		//dataout.open("3Ddata.txt", ios::app);
+		
+		//std::string command = "echo " + t + " " + block3f + " >> " + "3Dfolds.txt";
 		//system(command.c_str());
 		//command = "echo " + t + " " + simf + " " + blockf + " >> " + "folds.txt";
 		//system(command.c_str());

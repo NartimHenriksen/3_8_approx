@@ -19,9 +19,9 @@ vector<T> subset(vector<T> v, int first, int last) {
 	vector<T>::const_iterator l = v.begin() + 1 + last;
 	return (vector<T>(f, l));
 }
-int f(int x) {
-	//return ((int)sqrt(x));
-	return((int)(log(x) / log(2))); //try sqrt?
+int func(int x) {
+	return ((int)sqrt(x));
+	//return((int)(log(x) / log(2))); //try sqrt?
 }
 
 
@@ -92,6 +92,7 @@ void visualize(string inp, string fold) {
 	system(command.c_str());
 
 }
+
 
 string normal_form_rel(vector<bool> seq, int matches, bool odds, bool mirrored = false) {
 	if (seq.empty() || seq.size() == 1)
@@ -635,7 +636,7 @@ pair<vector<block>, vector<block>> subroutine2(vector<block> blocks) {
 	int E;
 	int x1 = 0, x2 = 0, y1 = 0, y2 = 0;
 	for (int i = 0; i < 3; i++) {
-		if (blocks[i].is_x) //can be true when its a sep block, but val will be 0 anyway
+		if (blocks[i].is_x)
 			x1 += blocks[i].val;
 		else { y1 += blocks[i].val; }
 	}
@@ -703,8 +704,6 @@ pair<vector<block>, vector<block>> subroutine2(vector<block> blocks) {
 		return{ second,first };
 
 }
-
-
 
 
 ///makes a cusp for algorithm B by taking some aminos from the largest superblock and making a rel fold of them
@@ -944,15 +943,15 @@ string block2DB(string inp, string udlr) //modded to accomodate nsew coords
 
 
 string pad(string s, xysuperblock sb, bool isfirst) {
-	char c = (isfirst ? 'u' : 'd');
-
+	char c = (isfirst ? 'u' : 'd'); //u, d
+	
 	while (s.size() < sb.total_sequence_length - 1) {
-		s += c;
+		s+=c;
 	}
 	return s;
 }
 
-string block3D(string inp, string udlr) {
+string block3D(string inp, string udlr,bool logdata) {
 	int nn = inp.length();
 	int count;
 	count = 0;
@@ -1014,19 +1013,12 @@ string block3D(string inp, string udlr) {
 	}
 	//superfold now contains fold and superblocks are modified to fit
 
-
-
-
-
-
-	//matchings is the 2nd lowest line
-	//lines: LB, matchings, actual score, UB
 	int matchings = min(X.xval, Y.yval);
-	int k = f(matchings);
+	int k = func(matchings);
 	int j = (matchings - 2 * k + 1) / k;
 	cout << "matchings: " << matchings << " k: " << k << " j: " << j << endl;
 	if (k == 1 || j < 2) {
-		return block2DB(inp);
+		//return block2DB(inp);
 	}
 
 
@@ -1097,19 +1089,20 @@ string block3D(string inp, string udlr) {
 			
 			xysuperblock sbpiece = xysuperblock(blockify(piece, superblock_x_first), f.is_x_superblock);
 			fold += sbpiece.superblock_normal_form_rel(true);
-			fold = pad(fold, f, true);
+			if (fold.size() < f.total_sequence_length - 1)
+				fold += 'r';
+			//fold = pad(fold, f, true);
+			while (fold.size() < f.total_sequence_length - 1)
+				fold += 'f';
 			break;
 		}
 		int to = boolmap[toprod];
-		vector<bool> piece = subset(raw, from, to); 
 
-												
+		vector<bool> piece = subset(raw, from, to); 									
 		bool piecepar = superblock_x_first;
-
-
-		xysuperblock sbpiece = xysuperblock(blockify(piece, piecepar), f.is_x_superblock); //This constructor decides on X and Y using the standard rules but it needs to take over from f instead!!
+		xysuperblock sbpiece = xysuperblock(blockify(piece, piecepar), f.is_x_superblock); //This constructor decides on X and Y using the standard rules but it needs to take over from f instead!!																				
+		fold += sbpiece.superblock_normal_form_rel(true); //main part
 		if (t % 2 == 0) {
-			fold += sbpiece.superblock_normal_form_rel(true); //the main part. mb mirror
 
 
 
@@ -1120,12 +1113,14 @@ string block3D(string inp, string udlr) {
 				fold = pad(fold, f, true); break;
 			}
 			if (boolmap[(t + 1)*j + off] == last_one + 2)//boolmap[(t + 1)*j + off] + 2) //if the next one is spaced by only one, exclude it
+			{
 				off++;
-
-			prod = (t + 1)*j + off;
-			if (prod >= boolmapsize) {
-				fold = pad(fold,f,true); break;
+				prod = (t + 1)*j + off;
+				if (prod >= boolmapsize) {
+					fold = pad(fold, f, true); break;
+				}
 			}
+			
 			int first_one = boolmap[prod]; //points to the nextone that can be placed. distance is first_one-last_one
 
 			int distance;
@@ -1139,21 +1134,21 @@ string block3D(string inp, string udlr) {
 			else if (foldstr[0] == 'r') { foldstr[0] = 'f'; }
 			fold += foldstr;
 
-			//replace first char: if f then r but if l then f
-			//fold += slide_fold()
-			//first abs then split?		t	1	int
 
 		}
 		else {
-			//main part folding down
-			fold += sbpiece.superblock_normal_form_rel(true); ////must mirror probably
 
 
 			//wrap part
 			
 			int prod = (t + 1)*j + off;
-			if (prod >= boolmapsize)
-			{fold = pad(fold, f, true); break; }
+			if (prod >= boolmapsize){//cant go straight down; there might be stuff under. rather extend one (if applicable) and then pad
+				if (fold.length() < f.total_sequence_length - 1) {
+					fold += 'f';
+				}
+				fold = pad(fold, f, true);
+				break;
+			}
 			int distance = boolmap[prod] - to;
 			
 			prod = prod + 1;
@@ -1240,17 +1235,7 @@ string block3D(string inp, string udlr) {
 
 
 
-
-
-
-
-
-
 	///last part gogogogo
-
-
-
-
 
 
 
@@ -1288,12 +1273,17 @@ string block3D(string inp, string udlr) {
 
 	 ////forward fold using boolmap (and the bool in s)
 	int hj = t.size();
+	int layercount=0;
 	fold = "";
 	raw = treat_input(inp);
 	raw = subset(raw, raw.size() - s.total_sequence_length, raw.size() - 1);
 	n = raw.size();
 	off = 0;//accumulated offset
 	for (int t = 0; true; t++) { //will need to include the off(set) in this loop header
+
+		layercount++;//can move to after checking from and to
+
+
 		int from, to;
 		from = boolmap[t*j + off];
 		
@@ -1303,11 +1293,16 @@ string block3D(string inp, string udlr) {
 
 			xysuperblock sbpiece = xysuperblock(blockify(piece, !superblock_x_first), s.is_x_superblock);
 			part3 += sbpiece.superblock_normal_form_rel(false);
-			part3 = pad(part3, s, false);
+			if (part3.size() < s.total_sequence_length - 1) {
+				part3 += 'l';
+			}
+			//part3 = pad(part3, s, false);
+			while (part3.size() < s.total_sequence_length - 1) {
+				part3 += 'f';
+			}
 			
 			break;
 		}
-
 		to = boolmap[(t + 1)*j + off - 1];
 		
 		prod = t*j + off;
@@ -1326,32 +1321,11 @@ string block3D(string inp, string udlr) {
 		}
 		to = boolmap[prod];
 
-
 		vector<bool> piece = subset(raw, from, to);
 
-
-		//locate the block that contains from. Only used to set label :/
-		/*	block first = s.blocks[0]; //Must initialize it???
-		int a = 0;
-		int asdasdstarter = 0;//maybe remove i think its always 1 at start
-		if (first.val == 0) { asdasdstarter = 1; }
-		for (int i = asdasdstarter; i < s.blocks.size(); i += 1) {
-		if (a <= from + 1 && a + s.blocks[i].size > from + 1) {
-		first = s.blocks[i];
-		break;
-		}
-		a += s.blocks[i].size;
-		}
-		*/
-		////forget about finding the block, its always Y up and X down.
-		bool pieceparity = !superblock_x_first;
-
-		xysuperblock sbpiece = xysuperblock(blockify(piece, pieceparity), s.is_x_superblock);
+		xysuperblock sbpiece = xysuperblock(blockify(piece, s.is_x_superblock), s.is_x_superblock);
 		if (t % 2 == 1) {//oppostite first part
 			part3 += sbpiece.superblock_normal_form_rel(false); //the main part. 
-
-														   //switch and slide
-														   //int to = boolmap[(t + 1)*j - 1];
 
 
 			int last_one = to;// boolmap[(t + 1)*j + off]; //made before incrementing off below!
@@ -1362,7 +1336,6 @@ string block3D(string inp, string udlr) {
 				part3 = pad(part3, s,false);
 				break;
 			}
-
 
 			if (boolmap[prod] == last_one + 2)//have to exclude one. Check with prod again
 			{
@@ -1375,10 +1348,8 @@ string block3D(string inp, string udlr) {
 			}
 
 			int first_one = boolmap[prod]; //points to the nextone that can be placed. distance is first_one-last_one
-
 			int distance;
 			
-
 			part3 += "dr";
 			distance = first_one - last_one;
 			int gap = (distance - 2) / 2 - 1;
@@ -1387,9 +1358,6 @@ string block3D(string inp, string udlr) {
 			else if (foldstr[0] == 'l') { foldstr[0] = 'f'; }
 			part3 += foldstr;
 
-			//replace first char: if f then r but if l then f
-			//fold += slide_fold()
-			//first abs then split?
 		}
 		else {
 			//main part folding down
@@ -1399,11 +1367,13 @@ string block3D(string inp, string udlr) {
 			//wrap part1
 			int prod = (t + 1)*j + off;
 			if (prod >= boolmap.size()) {
+				if (part3.length() < s.total_sequence_length - 1) {
+	//				part3 += 'f';
+				}
 				part3 = pad(part3, s,false);
 				break;
 			}
 			int distance = boolmap[prod] - to;
-
 
 
 			string wrap = string(distance / 2 - 1, 'f') + "rr" + string(distance / 2 - 1, 'f');
@@ -1424,13 +1394,6 @@ string block3D(string inp, string udlr) {
 				wrap2[0] = 'l';
 			part3 = part3 + wrap2;
 			off += 2; //the two matches count toward index so include them in off
-
-
-
-					  //switch and slide
-
-
-					  //distance 3 is distance of Switch and slide. if its 2 we pick the next
 
 			prod = (t + 1)*j + off;
 			if (prod >= boolmapsize) {
@@ -1459,7 +1422,6 @@ string block3D(string inp, string udlr) {
 				sas[1] = 'f';
 			else //its 'f' then
 				sas[1] = 'l';
-			//go around, switch and slide.
 			part3 += sas;
 		}
 
@@ -1467,22 +1429,56 @@ string block3D(string inp, string udlr) {
 	part3 = rel2abs(part3, udlr);
 	///forward fold done
 
+	//matchings is the 2nd lowest line
+	//lines: LB, matchings, actual score, UB
+	if (logdata) {
+
+		if (k == 1 || j < 2) {//dont want to handle cases with too few matched monoemrs cause it gets weird.
+			ofstream dataout;
+			dataout.open("3Ddata.txt", ios::app);
+			dataout << 0 << " " << 0 << " " << 0 << endl;
+			dataout.close();
+		}
+		else {
+			layercount;
+			vector<block> seq = blockify(treat_input(inp));
+			xysuperblock b(seq, true);
+			int minxy = min(b.xval, b.yval);
+			int matched = matchings; //often literally half of minxy :/
+			//int layerUB = (1 + minxy / j); //more precise?
+
+			int UB = 4 * minxy;
 
 
+			//LB. Remember we are only counting the matches for whichever side is smallest.
+			int LBmons = (minxy+1)/ 2; //we can match at least half
+			int LBlayerlimit = LBmons/ j-1; //a guess at the no of layers for below calc. The -1 is to bring it closer to experimental results. Only matters for small n
+			int LBlayermons = LBmons - LBlayerlimit - 3 * LBlayerlimit/ 2; //monomers used in the actual main part. I.E. without the skip spots and folding parts
+			int LBlayers = (1 + (LBlayermons) / j); //how many layers we can actually make once the skipped monomers are removed
+
+			int LB = 3 * (LBlayermons); //Layer mons contribution
+			LB += 3 * (LBlayers + 1) / 2; // wrap mons contribution
+			LB -= 2 * j; //End layers give 1 less
 
 
+			//arr. Basically the same except we might have arranged more monomers than the minxy/2 from the lower bound
+			int arrmons = matched; //the number we could match. Bounded by minxy/2 but usually not much higher
+			int arrlayerlimit = arrmons / j - 1;
+			int arrlayermons = arrmons - arrlayerlimit - 3 * arrlayerlimit / 2; 
+			int arrlayers = (1 + (arrlayermons) / j); 
+
+			int arr = 3 * (arrlayermons); //Layer mons contribution
+			arr += 3 * (arrlayers + 1) / 2; // wrap mons contribution
+			arr -= 2 * j; //End layers give 1 less
 
 
-
-
-
-
-
-
-	////yay done!!!
-
+			ofstream dataout;
+			dataout.open("3Ddata.txt", ios::app);
+			dataout << LB << " " << arr << " " << UB << endl;
+			dataout.close();
+		}
+	
+	}
 
 	return(part1 + part2 + part3);
-	//return(part2+part3);
-	//return(part1+part2);
 }
