@@ -19,12 +19,14 @@ vector<T> subset(vector<T> v, int first, int last) {
 	vector<T>::const_iterator l = v.begin() + 1 + last;
 	return (vector<T>(f, l));
 }
-int func(int x) {
+int func(int x) {//omguse the fucking square root
+	//return((int)(log(x) / log(2)));
 	return ((int)sqrt(x));
-	//return((int)(log(x) / log(2))); //try sqrt?
+	
+	//if((int) ( (double)(11 / 18)*sqrt(x) )==0)
+	//	return (1);
+	//return ((int)((double)(11 / 18)*sqrt(x)));
 }
-
-
 /******		Declared Functions		******/
 string normal_form(vector<bool> seq, int matches, string udlr, bool odds);
 string make_loop(int gap, char f, char inc, char dec);
@@ -707,9 +709,9 @@ string block2DA(string inp)
 	return(fold);
 
 }
-string block2DB(string inp, string udlr) //modded to accomodate nsew coords
+string block2DB(string inp)
 {
-
+	string udlr = "UDLRFB"; //removed from paramater
 	int count;
 	count = 0;
 
@@ -805,7 +807,27 @@ string pad(string s, xysuperblock sb, bool isfirst) {
 	return s;
 }
 
-string block3D(string inp, string udlr,bool logdata) {
+int min_odd_even(string inp) {
+	int odd = 0;
+	int even = 0;
+
+	for (int i = 0; i < inp.length(); i++) {
+		if (inp[i] == 'h') {
+			if (i % 2 == 0)
+				even++;
+			else
+				odd++;
+		}
+	
+	}
+
+
+	if (odd < even)
+		return odd;
+	return even;
+
+}
+string block3D(string inp, string udlr="UDLRFB",bool logdata=false) {
 	int nn = inp.length();
 	int count;
 	count = 0;
@@ -877,10 +899,10 @@ string block3D(string inp, string udlr,bool logdata) {
 	int matchings = min(X.xval, Y.yval);
 	int k = func(matchings);
 	int j = (matchings - 2 * k + 1) / k;
-	cout << "matchings: " << matchings << " k: " << k << " j: " << j << endl;
-	if (k == 1 || j < 2) {
+	//cout << "matchings: " << matchings << " k: " << k << " j: " << j << endl;
+	//if (k == 1 || j < 2) {
 		//return block2DB(inp);
-	}
+	//}
 
 
 
@@ -1310,7 +1332,7 @@ string block3D(string inp, string udlr,bool logdata) {
 
 
 			//LB. Remember we are only counting the matches for whichever side is smallest.
-			int LBlayerlimit = LBmons/ j-1; //a guess at the no of layers for below calc. The -1 is to bring it closer to experimental results. Only matters for small n
+			int LBlayerlimit = LBmons/ j; //a guess at the no of layers for below calc. 
 			int LBlayermons = LBmons - LBlayerlimit - 3 * LBlayerlimit/ 2; //monomers used in the actual main part. I.E. without the skip spots and folding parts
 			int LBlayers = (1 + (LBlayermons) / j); //how many layers we can actually make once the skipped monomers are removed
 
@@ -1409,11 +1431,42 @@ string block3D(string inp, string udlr,bool logdata) {
 
 			ofstream dataout;
 			dataout.open("3Ddata.txt", ios::app);
-			dataout << LB << " " << arr << " " << UB << endl;
+			float simple_LB = 3.0 / 8.0 * (1.0*UB);
+			dataout << nn << " " << simple_LB << " " << LB << " " << arr << " " << UB << endl; //dont output mtachings
 			dataout.close();
 		}
 	
 	}
 
 	return(part1 + part2 + part3);
+}
+string block3D(string inp) {
+	return block3D(inp, "UDLRFB", false);
+}
+
+
+void SAB2D(string inp) {
+	string simplefold = simple2D(inp);
+	string blockfold = block2DA(inp);
+	int minoe = min_odd_even(inp);
+	int UB = 2 * minoe;
+	float LB = .25 * UB;
+
+	ofstream out;
+	out.open("SAB2D.csv", ios::app);
+	out << inp.length() << " " << inp << " " << simplefold << " " << blockfold << " " << LB << " " << UB << endl;
+	out.close();
+
+}
+void SAB3D(string inp) {
+	string threedeefold = block3D(inp, "UDLRFB");
+	int minoe = min_odd_even(inp);
+	float UB = 4 * minoe;
+	float LB = 3.0 / 8.0 * UB;
+
+	ofstream out;
+	out.open("SAB3D.csv", ios::app);
+	out << inp.length() << " " << inp << " " << threedeefold << " " << LB << " " << UB << endl;
+	out.close();
+
 }

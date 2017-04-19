@@ -207,7 +207,8 @@ class HPFold:
                 print '----'*((self.max_j+1)-self.min_j)
 		
         if self.legal_fold[0]:
-            print "Score: %d" % (score)
+            if visual:
+                print "Score: %d" % (score)
         else:
             print "Illegal fold after %d steps" % (self.legal_fold[1]) 
         return score##

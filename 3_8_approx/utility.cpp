@@ -11,16 +11,17 @@ void brake() {
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 }
-std::string hp_gen(const int length) {
-	std::string s(length, 'h');
+std::string hp_gen(const int length, const int p) { //length and prevalence of H
+	std::string s(length, 'p');
 	for (int i = 0; i < length; i++) {
-		if (rand() % 2 == 0) {
-			s[i] = 'p';
+		if (rand() % p == 0) {
+			s[i] = 'h';
 		}
 
 	}
 	return(s);
 }
+
 
 
 template<typename T>

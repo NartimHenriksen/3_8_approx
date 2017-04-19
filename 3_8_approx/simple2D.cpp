@@ -228,3 +228,9 @@ string simple2D(string input) {
 	return(my_ufold);
 
 }
+
+string simple3D(string input){
+
+
+	return input;
+}
