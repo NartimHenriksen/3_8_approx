@@ -17,11 +17,13 @@ using namespace std;
 //std::pair<vector<block>, vector<block>> subroutine2(vector<block> blocks);
 //vector<block> blockify(vector<bool> b);
 
+template<class T>
+std::vector<T> reverse_vector(std::vector<T>v);
 void visualize3D(std::string inp, std::string fold);
 void visualize(std::string inp, std::string fold);
 void brake();
 std::vector<bool> treat_input(std::string);
-
+int func(int x);
 std::string block2DA(std::string inp);
 std::string block2DB(std::string inp); //, std::string udlr= "UDLRFB"
 std::string simple2D(std::string inp);

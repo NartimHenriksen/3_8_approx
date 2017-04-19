@@ -118,8 +118,13 @@ int main()
 	//sabTest2D(2);
 	//sabTest3D(2);
 
-	for (int i = 0; i < 15; i+=1) {
-		cout << simple3D(inps[i]) << endl;
+	for (int i = 0; i < 1; i+=1) {
+		//cout << simple3D(inps[i]) << endl;
+		//cout << "ppphhpphhhhpphhhphhphhphhhhpppppppphhhhhhpphhhhhhppppppppphphhphhhhhhhhhhhpphhhphhphpphphhhpppppphhh" << endl;
+		//cout << simple3D("ppphhpphhhhpphhhphhphhphhhhpppppppphhhhhhpphhhhhhppppppppphphhphhhhhhhhhhhpphhhphhphpphphhhpppppphhhphphphppppppppphhhhhhphphphppphhhpphphpphhhhphpphpphppppphpphpphpphhhhhphphphphpphpphpphppppppppppppppppphpphhhhphpphpphpppphpphhhhphpphpphppppppppppppppphphphhhhhhhhhhphppp") << endl;
+
+		cout << simple3D("ppphhpphhhhpphhhphhphhphhhhpppppppphhhhhhpphhhhhhppppppppphphhphhhhhhhhhhhpphhhphhphpphphhhpppppphhh") << endl;
+		
 		/**** TIMING STUFF ****/
 		
 		/*
