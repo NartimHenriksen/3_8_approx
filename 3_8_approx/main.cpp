@@ -8,10 +8,11 @@ void scoresTest(int p) { //outputs length, seq and folds to foldout.txt. Handled
 	
 	ofstream dfoldout;
 
-	dfoldout.open("foldout.txt", ios::app);
-	for (int i = 200; i < 201; i += 1000) {
+	dfoldout.open("foldout.txt");
+	for (int i = 1000; i < 100000; i += 1000) {
 		string t = hp_gen(i, p);
-		dfoldout << t.length() << " " << t << " " << simple2D(t) << " " << block2DA(t) << " " << block3D(t, "UDLRFB",false) << endl;
+
+		dfoldout << t.length() << " " << t << " " << simple2D(t) << " " << block2DA(t) << " " << block3D(t, "UDLRFB",false) << " " << simple3D(t) << endl;
 	}
 	dfoldout.close();
 }
@@ -30,10 +31,11 @@ void runTest(int p) {//50 iterations to smoothen curve. Can be plotted directly.
 		double time_2d_ms = time_any(iter, t, simple2D) / iter;
 		double time_b2da_ms = time_any(iter, t, block2DA) / iter;
 		double time_b3d_ms = time_any(iter, t, block3D) / iter;
+		double time_s3d_ms = time_any(iter, t, simple3D) / iter;
 
-		cout << i << " " << time_2d_ms << " " << time_b2da_ms << " " << time_b3d_ms << endl;
+		cout << i << " " << time_2d_ms << " " << time_b2da_ms << " " << time_b3d_ms << " " << time_s3d_ms << endl;
 
-		out << i << " " << time_2d_ms << " " << time_b2da_ms << " " << time_b3d_ms << endl;
+		out << i << " " << time_2d_ms << " " << time_b2da_ms << " " << time_b3d_ms << " " << time_s3d_ms << endl;
 	}
 	out.close();
 
@@ -124,24 +126,15 @@ int main()
 		//cout << simple3D("ppphhpphhhhpphhhphhphhphhhhpppppppphhhhhhpphhhhhhppppppppphphhphhhhhhhhhhhpphhhphhphpphphhhpppppphhhphphphppppppppphhhhhhphphphppphhhpphphpphhhhphpphpphppppphpphpphpphhhhhphphphphpphpphpphppppppppppppppppphpphhhhphpphpphpppphpphhhhphpphpphppppppppppppppphphphhhhhhhhhhphppp") << endl;
 
 		//singletest
-		
+		/*
 		int l = 100;
 		string teststr = hp_gen(l, 2);
 		cout << teststr << endl << simple3D(teststr) << endl;
-		
-		/**** TIMING STUFF ****/
-		
-		/*
-		string t = hp_gen(i);
-		int iter = 50;
-
-		
-		double time_2d_ms = time_any(iter, t, simple2D)/iter;
-		double time_b2da_ms = time_any(iter, t, block2DA)/iter;
-		double time_b3d_ms = time_any(iter, t, block3D)/iter;
-		
-		cout << i << " " << time_2d_ms << " " << time_b2da_ms << " " << time_b3d_ms << endl;
 		*/
+		cout << simple3D(hp_gen(100, 2)) << endl;
+
+		scoresTest(2);
+		//runTest(2);
 
 		/**** Scoring stuff ****/
 		
