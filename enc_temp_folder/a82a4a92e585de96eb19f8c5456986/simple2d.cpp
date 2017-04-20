@@ -491,7 +491,7 @@ string make_strand(vector<bool> seq, int pairings, int j, bool wrap, string udlr
 }
 
 string simple3D(string input){
-	/*NOTE: if j<3 it might produce illegal folds when running out of pairings during a wrap. Probably dont want to fix this since we dont care lolz*/
+
 	
 	vector<bool> seq = treat_input(input);
 	int n = seq.size();

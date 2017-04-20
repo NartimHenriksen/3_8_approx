@@ -123,7 +123,11 @@ int main()
 		//cout << "ppphhpphhhhpphhhphhphhphhhhpppppppphhhhhhpphhhhhhppppppppphphhphhhhhhhhhhhpphhhphhphpphphhhpppppphhh" << endl;
 		//cout << simple3D("ppphhpphhhhpphhhphhphhphhhhpppppppphhhhhhpphhhhhhppppppppphphhphhhhhhhhhhhpphhhphhphpphphhhpppppphhhphphphppppppppphhhhhhphphphppphhhpphphpphhhhphpphpphppppphpphpphpphhhhhphphphphpphpphpphppppppppppppppppphpphhhhphpphpphpppphpphhhhphpphpphppppppppppppppphphphhhhhhhhhhphppp") << endl;
 
-		cout << simple3D("ppphhpphhhhpphhhphhphhphhhhpppppppphhhhhhpphhhhhhppppppppphphhphhhhhhhhhhhpphhhphhphpphphhhpppppphhh") << endl;
+		//singletest
+		
+		int l = 100;
+		string teststr = hp_gen(l, 2);
+		cout << teststr << endl << simple3D(teststr) << endl;
 		
 		/**** TIMING STUFF ****/
 		
